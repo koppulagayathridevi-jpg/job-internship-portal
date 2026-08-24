@@ -1,0 +1,28 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.hero-section {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(
+        135deg,
+        #f8f9fa,
+        #e9f2ff
+    );
+}
+
+.card {
+    border: none;
+}
+
+.btn {
+    border-radius: 6px;
+}
+
+.navbar-brand {
+    letter-spacing: 0.5px;
+}

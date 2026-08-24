@@ -1,0 +1,980 @@
+/* =========================================================
+   JOB DETAILS PAGE
+   JobPortal
+========================================================= */
+
+.job-details-page {
+    min-height: calc(100vh - 65px);
+
+    background: #f8fafc;
+
+    padding: 45px 0 60px;
+
+    font-family: "Inter", Arial, sans-serif;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.job-details-header {
+    background: #ffffff;
+
+    border: 1px solid #e5eaf2;
+
+    border-radius: 12px;
+
+    padding: 35px;
+
+    margin-bottom: 25px;
+
+    box-shadow:
+        0 8px 25px rgba(15, 23, 42, 0.05);
+}
+
+
+.job-header-top {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    margin-bottom: 30px;
+}
+
+
+.job-details-badge {
+    display: inline-block;
+
+    padding: 7px 12px;
+
+    margin-bottom: 13px;
+
+    border-radius: 20px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: .5px;
+}
+
+
+.job-details-header h1 {
+    margin: 0 0 9px;
+
+    color: #0b1f44;
+
+    font-size: 32px;
+
+    line-height: 1.2;
+
+    font-weight: 800;
+
+    letter-spacing: -.5px;
+}
+
+
+.job-details-header h4 {
+    margin: 0;
+
+    color: #2563eb;
+
+    font-size: 16px;
+
+    font-weight: 650;
+}
+
+
+/* =========================================================
+   SUMMARY GRID
+========================================================= */
+
+.job-summary-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    border-top: 1px solid #edf1f5;
+
+    padding-top: 25px;
+
+    gap: 15px;
+}
+
+
+.job-summary-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 13px;
+
+    border-radius: 7px;
+
+    background: #f8fafc;
+}
+
+
+.job-summary-icon {
+    width: 38px;
+
+    height: 38px;
+
+    min-width: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    font-size: 16px;
+}
+
+
+.job-summary-item small {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+.job-summary-item strong {
+    display: block;
+
+    color: #334155;
+
+    font-size: 14px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   MAIN LAYOUT
+========================================================= */
+
+.job-details-layout {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr) 320px;
+
+    gap: 25px;
+
+    align-items: start;
+}
+
+
+/* =========================================================
+   MAIN CONTENT CARD
+========================================================= */
+
+.job-details-card {
+    background: #ffffff;
+
+    border: 1px solid #e5eaf2;
+
+    border-radius: 10px;
+
+    padding: 28px;
+
+    margin-bottom: 20px;
+
+    box-shadow:
+        0 5px 18px rgba(15, 23, 42, 0.035);
+}
+
+
+.job-details-card h2 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 20px;
+
+    font-weight: 750;
+}
+
+
+.job-section-line {
+    width: 40px;
+
+    height: 3px;
+
+    margin: 11px 0 18px;
+
+    border-radius: 5px;
+
+    background: #2563eb;
+}
+
+
+.job-details-card p {
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 15px;
+
+    line-height: 1.8;
+}
+
+
+/* =========================================================
+   RESPONSIBILITIES
+========================================================= */
+
+.job-responsibilities {
+    padding: 0;
+
+    margin: 0;
+
+    list-style: none;
+}
+
+
+.job-responsibilities li {
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 11px;
+
+    padding: 10px 0;
+
+    border-bottom: 1px solid #f1f5f9;
+
+    color: #475569;
+
+    font-size: 14px;
+
+    line-height: 1.7;
+}
+
+
+.job-responsibilities li:last-child {
+    border-bottom: none;
+
+    padding-bottom: 0;
+}
+
+
+.job-responsibilities li:first-child {
+    padding-top: 0;
+}
+
+
+.job-responsibilities li span {
+    width: 21px;
+
+    height: 21px;
+
+    min-width: 21px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 11px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   SKILLS
+========================================================= */
+
+.job-skills {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 9px;
+}
+
+
+.job-skills span {
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 8px 12px;
+
+    border-radius: 5px;
+
+    background: #eff6ff;
+
+    border: 1px solid #dbeafe;
+
+    color: #2563eb;
+
+    font-size: 13px;
+
+    font-weight: 650;
+}
+
+
+/* =========================================================
+   ELIGIBILITY
+========================================================= */
+
+.job-eligibility {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 15px;
+}
+
+
+.job-eligibility > div {
+    padding: 16px;
+
+    border-radius: 7px;
+
+    background: #f8fafc;
+
+    border: 1px solid #edf1f5;
+}
+
+
+.job-eligibility small {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+
+.job-eligibility strong {
+    display: block;
+
+    color: #334155;
+
+    font-size: 14px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.job-details-sidebar {
+    position: sticky;
+
+    top: 20px;
+}
+
+
+/* =========================================================
+   APPLY CARD
+========================================================= */
+
+.job-apply-card {
+    padding: 25px;
+
+    margin-bottom: 18px;
+
+    border-radius: 10px;
+
+    background: #0b1f44;
+
+    box-shadow:
+        0 10px 25px rgba(11, 31, 68, .15);
+}
+
+
+.job-apply-card h3 {
+    margin: 0 0 10px;
+
+    color: #ffffff;
+
+    font-size: 19px;
+
+    font-weight: 750;
+
+    line-height: 1.4;
+}
+
+
+.job-apply-card p {
+    margin: 0 0 20px;
+
+    color: #cbd5e1;
+
+    font-size: 14px;
+
+    line-height: 1.7;
+}
+
+
+.job-apply-button {
+    width: 100%;
+
+    height: 44px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: .2s ease;
+}
+
+
+.job-apply-button:hover {
+    background: #3b82f6;
+
+    transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   SIDEBAR CARD
+========================================================= */
+
+.job-sidebar-card {
+    background: #ffffff;
+
+    border: 1px solid #e5eaf2;
+
+    border-radius: 10px;
+
+    padding: 22px;
+
+    margin-bottom: 18px;
+
+    box-shadow:
+        0 5px 18px rgba(15, 23, 42, 0.035);
+}
+
+
+.job-sidebar-card h4 {
+    margin: 0 0 17px;
+
+    color: #0f172a;
+
+    font-size: 16px;
+
+    font-weight: 750;
+}
+
+
+/* =========================================================
+   DEADLINE
+========================================================= */
+
+.job-deadline {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 13px;
+
+    border-radius: 7px;
+
+    background: #fff7ed;
+
+    border: 1px solid #fed7aa;
+}
+
+
+.job-deadline span {
+    font-size: 18px;
+}
+
+
+.job-deadline strong {
+    color: #c2410c;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   JOB INFORMATION
+========================================================= */
+
+.job-info-list {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 0;
+}
+
+
+.job-info-list > div {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 12px 0;
+
+    border-bottom: 1px solid #f1f5f9;
+}
+
+
+.job-info-list > div:first-child {
+    padding-top: 0;
+}
+
+
+.job-info-list > div:last-child {
+    border-bottom: none;
+
+    padding-bottom: 0;
+}
+
+
+.job-info-list span {
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+.job-info-list strong {
+    color: #334155;
+
+    font-size: 13px;
+
+    text-align: right;
+}
+
+
+/* =========================================================
+   BACK BUTTON
+========================================================= */
+
+.job-back-wrapper {
+    margin-top: 5px;
+}
+
+
+.job-back-button {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    height: 40px;
+
+    padding: 0 17px;
+
+    border: 1px solid #dbe2ea;
+
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    font-size: 13px;
+
+    font-weight: 650;
+
+    text-decoration: none;
+
+    transition: .2s ease;
+}
+
+
+.job-back-button:hover {
+    border-color: #2563eb;
+
+    color: #2563eb;
+
+    background: #eff6ff;
+}
+
+
+/* =========================================================
+   RESPONSIVE - TABLET
+========================================================= */
+
+@media (max-width: 991px) {
+
+    .job-summary-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+
+    .job-details-layout {
+        grid-template-columns: 1fr;
+    }
+
+
+    .job-details-sidebar {
+        position: static;
+    }
+
+
+    .job-details-card p {
+        font-size: 14px;
+    }
+
+
+    .job-responsibilities li {
+        font-size: 14px;
+    }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE - MOBILE
+========================================================= */
+
+@media (max-width: 767px) {
+
+    .job-details-page {
+        padding: 30px 15px 45px;
+    }
+
+
+    .job-details-header {
+        padding: 23px;
+    }
+
+
+    .job-header-top {
+        margin-bottom: 25px;
+    }
+
+
+    .job-details-badge {
+        font-size: 11px;
+
+        padding: 6px 10px;
+    }
+
+
+    .job-details-header h1 {
+        font-size: 26px;
+    }
+
+
+    .job-details-header h4 {
+        font-size: 14px;
+    }
+
+
+    .job-summary-grid {
+        grid-template-columns: 1fr;
+
+        padding-top: 20px;
+    }
+
+
+    .job-summary-item small {
+        font-size: 11px;
+    }
+
+
+    .job-summary-item strong {
+        font-size: 13px;
+    }
+
+
+    .job-details-card {
+        padding: 22px;
+    }
+
+
+    .job-details-card h2 {
+        font-size: 19px;
+    }
+
+
+    .job-details-card p {
+        font-size: 14px;
+
+        line-height: 1.8;
+    }
+
+
+    .job-responsibilities li {
+        font-size: 13px;
+
+        line-height: 1.7;
+    }
+
+
+    .job-skills span {
+        font-size: 12px;
+    }
+
+
+    .job-eligibility {
+        grid-template-columns: 1fr;
+    }
+
+
+    .job-eligibility small {
+        font-size: 11px;
+    }
+
+
+    .job-eligibility strong {
+        font-size: 13px;
+    }
+
+
+    .job-apply-card {
+        padding: 22px;
+    }
+
+
+    .job-apply-card h3 {
+        font-size: 18px;
+    }
+
+
+    .job-apply-card p {
+        font-size: 13px;
+    }
+
+
+    .job-apply-button {
+        font-size: 13px;
+    }
+
+
+    .job-sidebar-card h4 {
+        font-size: 15px;
+    }
+
+
+    .job-info-list span {
+        font-size: 11px;
+    }
+
+
+    .job-info-list strong {
+        font-size: 12px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .job-details-header {
+        padding: 20px;
+    }
+
+
+    .job-details-header h1 {
+        font-size: 23px;
+    }
+
+
+    .job-details-header h4 {
+        font-size: 13px;
+    }
+
+
+    .job-details-badge {
+        font-size: 10px;
+    }
+
+
+    .job-summary-item {
+        padding: 12px;
+    }
+
+
+    .job-summary-item small {
+        font-size: 11px;
+    }
+
+
+    .job-summary-item strong {
+        font-size: 13px;
+    }
+
+
+    .job-details-card {
+        padding: 20px;
+    }
+
+
+    .job-details-card h2 {
+        font-size: 18px;
+    }
+
+
+    .job-details-card p {
+        font-size: 13px;
+
+        line-height: 1.8;
+    }
+
+
+    .job-responsibilities li {
+        font-size: 13px;
+
+        line-height: 1.7;
+    }
+
+
+    .job-responsibilities li span {
+        width: 20px;
+
+        height: 20px;
+
+        min-width: 20px;
+
+        font-size: 10px;
+    }
+
+
+    .job-skills {
+        gap: 7px;
+    }
+
+
+    .job-skills span {
+        padding: 7px 10px;
+
+        font-size: 12px;
+    }
+
+
+    .job-eligibility > div {
+        padding: 14px;
+    }
+
+
+    .job-eligibility small {
+        font-size: 11px;
+    }
+
+
+    .job-eligibility strong {
+        font-size: 13px;
+    }
+
+
+    .job-apply-card {
+        padding: 20px;
+    }
+
+
+    .job-apply-card h3 {
+        font-size: 17px;
+    }
+
+
+    .job-apply-card p {
+        font-size: 13px;
+    }
+
+
+    .job-apply-button {
+        height: 43px;
+
+        font-size: 13px;
+    }
+
+
+    .job-sidebar-card {
+        padding: 20px;
+    }
+
+
+    .job-sidebar-card h4 {
+        font-size: 15px;
+    }
+
+
+    .job-deadline strong {
+        font-size: 12px;
+    }
+
+
+    .job-info-list span {
+        font-size: 11px;
+    }
+
+
+    .job-info-list strong {
+        font-size: 12px;
+    }
+
+
+    .job-back-button {
+        height: 39px;
+
+        font-size: 12px;
+    }
+
+}

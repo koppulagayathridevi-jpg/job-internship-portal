@@ -1,0 +1,908 @@
+/* =========================================================
+   HOME PAGE
+   JobPortal
+========================================================= */
+
+.home-page {
+    min-height: 100vh;
+    background: #f8fafc;
+    color: #0b1f44;
+    font-family: "Inter", Arial, sans-serif;
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.home-hero {
+    position: relative;
+    min-height: 455px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 55px 0;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #f8fbff 55%,
+            #eef5ff 100%
+        );
+}
+
+
+/* Decorative background */
+
+.home-hero::before {
+    content: "";
+
+    position: absolute;
+
+    width: 430px;
+    height: 430px;
+
+    right: -150px;
+    top: -170px;
+
+    border-radius: 50%;
+
+    background: #eaf2ff;
+
+    opacity: 0.75;
+}
+
+
+.home-hero::after {
+    content: "";
+
+    position: absolute;
+
+    width: 250px;
+    height: 250px;
+
+    right: 15%;
+    bottom: -180px;
+
+    border-radius: 50%;
+
+    background: #f0f6ff;
+}
+
+
+/* =========================================================
+   HERO CONTENT
+========================================================= */
+
+.home-hero-content {
+    position: relative;
+    z-index: 2;
+
+    max-width: 650px;
+}
+
+
+/* Small label */
+
+.home-hero-label {
+    display: inline-block;
+
+    margin-bottom: 15px;
+
+    color: #2563eb;
+
+    font-size: 14px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.3px;
+}
+
+
+/* Main heading */
+
+.home-hero h1 {
+    margin: 0;
+
+    color: #0b1f44;
+
+    font-size: 52px;
+
+    line-height: 1.12;
+
+    font-weight: 800;
+
+    letter-spacing: -1.2px;
+}
+
+.home-hero h1 span {
+    color: #2563eb;
+}
+
+
+/* Description */
+
+.home-hero p {
+    max-width: 560px;
+
+    margin: 20px 0 0;
+
+    color: #64748b;
+
+    font-size: 18px;
+
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   HERO BUTTONS
+========================================================= */
+
+.home-hero-buttons {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-top: 28px;
+}
+
+
+.home-primary-btn,
+.home-outline-btn {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    height: 44px;
+
+    padding: 0 22px;
+
+    border-radius: 5px;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition: all 0.2s ease;
+}
+
+
+/* Primary */
+
+.home-primary-btn {
+    border: 1px solid #2563eb;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    box-shadow:
+        0 5px 12px rgba(37, 99, 235, 0.18);
+}
+
+
+.home-primary-btn:hover {
+    background: #1d4ed8;
+
+    border-color: #1d4ed8;
+
+    color: #ffffff;
+
+    transform: translateY(-1px);
+}
+
+
+/* Outline */
+
+.home-outline-btn {
+    border: 1px solid #a9c3ed;
+
+    background: #ffffff;
+
+    color: #2563eb;
+}
+
+
+.home-outline-btn:hover {
+    border-color: #2563eb;
+
+    background: #eff6ff;
+
+    color: #1d4ed8;
+}
+
+
+/* =========================================================
+   HERO VISUAL
+========================================================= */
+
+.home-hero-visual {
+    position: relative;
+
+    min-height: 320px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+}
+
+
+/* Main illustration */
+
+.home-illustration-card {
+    position: relative;
+
+    width: 245px;
+    height: 190px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    border: 1px solid #dbe7f8;
+
+    border-radius: 12px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 20px 45px rgba(15, 45, 90, 0.08);
+
+    transform: rotate(-2deg);
+}
+
+
+/* Illustration icon */
+
+.home-illustration-icon {
+    width: 62px;
+    height: 62px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 14px;
+
+    background: #eaf2ff;
+
+    font-size: 28px;
+}
+
+
+/* Fake text lines */
+
+.home-illustration-line {
+    width: 130px;
+    height: 6px;
+
+    border-radius: 10px;
+
+    background: #dbeafe;
+}
+
+
+.home-illustration-line.large {
+    width: 160px;
+
+    background: #bfdbfe;
+}
+
+
+.home-illustration-line.small {
+    width: 90px;
+}
+
+
+/* Floating card */
+
+.home-floating-card {
+    position: absolute;
+
+    right: 5%;
+    bottom: 35px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 13px 16px;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 10px 25px rgba(15, 23, 42, 0.09);
+}
+
+
+.home-floating-icon {
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #dcfce7;
+
+    color: #16a34a;
+
+    font-size: 14px;
+
+    font-weight: 800;
+}
+
+
+.home-floating-card strong {
+    display: block;
+
+    color: #0f172a;
+
+    font-size: 14px;
+}
+
+
+.home-floating-card small {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   FEATURES
+========================================================= */
+
+.home-features {
+    padding: 65px 0;
+
+    background: #ffffff;
+}
+
+
+/* Section heading */
+
+.home-section-heading {
+    max-width: 650px;
+
+    margin: 0 auto 40px;
+
+    text-align: center;
+}
+
+
+.home-section-heading span {
+    color: #2563eb;
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.2px;
+}
+
+
+.home-section-heading h2 {
+    margin: 10px 0 12px;
+
+    color: #0b1f44;
+
+    font-size: 32px;
+
+    font-weight: 800;
+
+    letter-spacing: -0.4px;
+}
+
+
+.home-section-heading p {
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 16px;
+
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   FEATURE CARD
+========================================================= */
+
+.home-feature-card {
+    height: 100%;
+
+    padding: 30px 25px;
+
+    border: 1px solid #e5eaf1;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    text-align: center;
+
+    box-shadow:
+        0 4px 15px rgba(15, 23, 42, 0.035);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.home-feature-card:hover {
+    transform: translateY(-4px);
+
+    border-color: #d3e2f8;
+
+    box-shadow:
+        0 12px 25px rgba(15, 23, 42, 0.07);
+}
+
+
+/* Feature icon */
+
+.home-feature-icon {
+    width: 50px;
+    height: 50px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 18px;
+
+    border-radius: 50%;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 20px;
+}
+
+
+/* Feature heading */
+
+.home-feature-card h3 {
+    margin: 0 0 12px;
+
+    color: #0f172a;
+
+    font-size: 18px;
+
+    font-weight: 750;
+}
+
+
+/* Feature description */
+
+.home-feature-card p {
+    max-width: 280px;
+
+    margin: 0 auto 18px;
+
+    color: #64748b;
+
+    font-size: 15px;
+
+    line-height: 1.7;
+}
+
+
+/* Feature link */
+
+.home-feature-card a {
+    color: #2563eb;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    text-decoration: none;
+}
+
+
+.home-feature-card a:hover {
+    color: #1d4ed8;
+}
+
+
+/* =========================================================
+   CTA
+========================================================= */
+
+.home-cta {
+    padding: 45px 0 60px;
+
+    background: #ffffff;
+}
+
+
+.home-cta-box {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 30px;
+
+    padding: 35px 40px;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0b1f44,
+            #123b78
+        );
+
+    box-shadow:
+        0 12px 30px rgba(11, 31, 68, 0.15);
+}
+
+
+.home-cta-box h2 {
+    margin: 0 0 8px;
+
+    color: #ffffff;
+
+    font-size: 26px;
+
+    font-weight: 750;
+}
+
+
+.home-cta-box p {
+    margin: 0;
+
+    color: #cbd5e1;
+
+    font-size: 15px;
+
+    line-height: 1.6;
+}
+
+
+.home-cta-button {
+    flex-shrink: 0;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    height: 42px;
+
+    padding: 0 22px;
+
+    border-radius: 5px;
+
+    background: #ffffff;
+
+    color: #2563eb;
+
+    font-size: 15px;
+
+    font-weight: 750;
+
+    text-decoration: none;
+
+    transition: 0.2s ease;
+}
+
+
+.home-cta-button:hover {
+    background: #eff6ff;
+
+    color: #1d4ed8;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 991px) {
+
+    .home-hero {
+        padding: 50px 25px;
+    }
+
+
+    .home-hero-content {
+        max-width: 600px;
+    }
+
+
+    .home-hero h1 {
+        font-size: 44px;
+    }
+
+
+    .home-hero p {
+        font-size: 17px;
+    }
+
+
+    .home-hero-visual {
+        margin-top: 35px;
+    }
+
+
+    .home-section-heading h2 {
+        font-size: 30px;
+    }
+
+
+    .home-feature-card h3 {
+        font-size: 17px;
+    }
+
+
+    .home-feature-card p {
+        font-size: 14px;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 767px) {
+
+    .home-hero {
+        padding: 45px 20px;
+    }
+
+
+    .home-hero-label {
+        font-size: 13px;
+    }
+
+
+    .home-hero h1 {
+        font-size: 38px;
+
+        letter-spacing: -0.7px;
+    }
+
+
+    .home-hero p {
+        font-size: 15px;
+
+        line-height: 1.7;
+    }
+
+
+    .home-hero-buttons {
+        flex-wrap: wrap;
+
+        gap: 10px;
+    }
+
+
+    .home-primary-btn,
+    .home-outline-btn {
+        height: 42px;
+
+        padding: 0 18px;
+
+        font-size: 14px;
+    }
+
+
+    .home-hero-visual {
+        min-height: 270px;
+
+        margin-top: 25px;
+    }
+
+
+    .home-illustration-card {
+        width: 210px;
+        height: 165px;
+    }
+
+
+    .home-floating-card {
+        right: 5%;
+
+        bottom: 20px;
+    }
+
+
+    .home-features {
+        padding: 50px 20px;
+    }
+
+
+    .home-section-heading {
+        margin-bottom: 32px;
+    }
+
+
+    .home-section-heading span {
+        font-size: 12px;
+    }
+
+
+    .home-section-heading h2 {
+        font-size: 28px;
+    }
+
+
+    .home-section-heading p {
+        font-size: 15px;
+    }
+
+
+    .home-feature-card {
+        padding: 28px 20px;
+    }
+
+
+    .home-feature-card h3 {
+        font-size: 18px;
+    }
+
+
+    .home-feature-card p {
+        font-size: 14px;
+    }
+
+
+    .home-feature-card a {
+        font-size: 14px;
+    }
+
+
+    .home-cta {
+        padding: 25px 20px 45px;
+    }
+
+
+    .home-cta-box {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        padding: 30px 25px;
+    }
+
+
+    .home-cta-box h2 {
+        font-size: 24px;
+    }
+
+
+    .home-cta-box p {
+        font-size: 14px;
+    }
+
+
+    .home-cta-button {
+        font-size: 14px;
+
+        height: 42px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+
+    .home-hero {
+        padding: 40px 15px;
+    }
+
+
+    .home-hero-label {
+        font-size: 12px;
+    }
+
+
+    .home-hero h1 {
+        font-size: 32px;
+    }
+
+
+    .home-hero p {
+        font-size: 15px;
+    }
+
+
+    .home-primary-btn,
+    .home-outline-btn {
+        height: 40px;
+
+        padding: 0 15px;
+
+        font-size: 13px;
+    }
+
+
+    .home-floating-card {
+        right: 0;
+    }
+
+
+    .home-floating-card strong {
+        font-size: 13px;
+    }
+
+
+    .home-floating-card small {
+        font-size: 11px;
+    }
+
+
+    .home-section-heading h2 {
+        font-size: 25px;
+    }
+
+
+    .home-section-heading p {
+        font-size: 14px;
+    }
+
+
+    .home-feature-card h3 {
+        font-size: 17px;
+    }
+
+
+    .home-feature-card p {
+        font-size: 14px;
+    }
+
+
+    .home-cta-box h2 {
+        font-size: 22px;
+    }
+
+}
