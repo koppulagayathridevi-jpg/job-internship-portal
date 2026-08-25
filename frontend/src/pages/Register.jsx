@@ -1,266 +1,184 @@
-import { Link } from "react-router-dom";
+
+
+
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import "../styles/register.css";
 
 function Register() {
-    return (
-        <div className="register-page">
+  const navigate = useNavigate();
 
-            <div className="register-container">
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-                {/* =========================
-                    LEFT SIDE
-                ========================= */}
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-                <div className="register-left">
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-                    <div className="register-left-content">
+    if (form.password !== form.confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
 
-                        <div className="register-illustration">
-                            👨‍💻
-                        </div>
+    try {
+      await axios.post("http://localhost:5000/api/auth/register", {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role: "candidate", // Always register as candidate
+      });
 
-                        <h1>
-                            Start Your Career
-                            <span>Journey Today</span>
-                        </h1>
+      alert("Registered Successfully!");
+      navigate("/login");
+    } catch (err) {
+      alert(err.response?.data?.message || "Registration Failed");
+    }
+  };
 
-                        <p>
-                            Create your account and discover jobs and
-                            internships that match your skills and
-                            career goals.
-                        </p>
+  return (
+    <div className="register-page">
+      <div className="register-container">
 
+        {/* LEFT SIDE */}
+        <div className="register-left">
+          <div className="register-left-content">
+            <div className="register-illustration">👨‍💻</div>
 
-                        <div className="register-benefits">
+            <h1>
+              Start Your Career
+              <span>Journey Today</span>
+            </h1>
 
-                            <div className="register-benefit">
+            <p>
+              Create your account and discover jobs and internships that match
+              your skills and career goals.
+            </p>
 
-                                <div className="benefit-icon">
-                                    ✓
-                                </div>
-
-                                <div>
-                                    <strong>
-                                        Find the Right Opportunities
-                                    </strong>
-
-                                    <span>
-                                        Discover jobs that match your skills.
-                                    </span>
-                                </div>
-
-                            </div>
-
-
-                            <div className="register-benefit">
-
-                                <div className="benefit-icon">
-                                    ✓
-                                </div>
-
-                                <div>
-                                    <strong>
-                                        Easy Job Applications
-                                    </strong>
-
-                                    <span>
-                                        Apply to jobs with just a few clicks.
-                                    </span>
-                                </div>
-
-                            </div>
-
-
-                            <div className="register-benefit">
-
-                                <div className="benefit-icon">
-                                    ✓
-                                </div>
-
-                                <div>
-                                    <strong>
-                                        Track Your Progress
-                                    </strong>
-
-                                    <span>
-                                        Manage applications from your dashboard.
-                                    </span>
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
+            <div className="register-benefits">
+              <div className="register-benefit">
+                <div className="benefit-icon">✓</div>
+                <div>
+                  <strong>Find the Right Opportunities</strong>
+                  <span>Discover jobs that match your skills.</span>
                 </div>
+              </div>
 
-
-                {/* =========================
-                    RIGHT SIDE
-                ========================= */}
-
-                <div className="register-right">
-
-                    <div className="register-form-card">
-
-                        {/* Header */}
-
-                        <div className="register-form-header">
-
-                            <div className="register-form-icon">
-                                ✎
-                            </div>
-
-                            <h2>
-                                Create Account
-                            </h2>
-
-                            <p>
-                                Register to get started with JobPortal
-                            </p>
-
-                        </div>
-
-
-                        {/* Form */}
-
-                        <form className="register-form">
-
-                            {/* Full Name */}
-
-                            <div className="register-field">
-
-                                <label htmlFor="fullName">
-                                    Full Name
-                                </label>
-
-                                <input
-                                    id="fullName"
-                                    type="text"
-                                    placeholder="Enter your full name"
-                                />
-
-                            </div>
-
-
-                            {/* Email */}
-
-                            <div className="register-field">
-
-                                <label htmlFor="email">
-                                    Email Address
-                                </label>
-
-                                <input
-                                    id="email"
-                                    type="email"
-                                    placeholder="Enter your email"
-                                />
-
-                            </div>
-
-
-                            {/* Password */}
-
-                            <div className="register-field">
-
-                                <label htmlFor="password">
-                                    Password
-                                </label>
-
-                                <div className="register-password">
-
-                                    <input
-                                        id="password"
-                                        type="password"
-                                        placeholder="Create a password"
-                                    />
-
-                                    <span>
-                                        ◉
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-
-                            {/* Confirm Password */}
-
-                            <div className="register-field">
-
-                                <label htmlFor="confirmPassword">
-                                    Confirm Password
-                                </label>
-
-                                <div className="register-password">
-
-                                    <input
-                                        id="confirmPassword"
-                                        type="password"
-                                        placeholder="Confirm your password"
-                                    />
-
-                                    <span>
-                                        ◉
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-
-                            {/* Terms */}
-
-                            <div className="register-terms">
-
-                                <input
-                                    type="checkbox"
-                                    id="terms"
-                                />
-
-                                <label htmlFor="terms">
-                                    I agree to the Terms & Conditions
-                                </label>
-
-                            </div>
-
-
-                            {/* Register Button */}
-
-                            <button
-                                type="submit"
-                                className="register-button"
-                            >
-                                Create Account
-                            </button>
-
-
-                            {/* Login */}
-
-                            <div className="register-login">
-
-                                <span>
-                                    Already have an account?
-                                </span>
-
-                                <Link to="/login">
-                                    Login here
-                                </Link>
-
-                            </div>
-
-                        </form>
-
-                    </div>
-
+              <div className="register-benefit">
+                <div className="benefit-icon">✓</div>
+                <div>
+                  <strong>Easy Job Applications</strong>
+                  <span>Apply to jobs with just a few clicks.</span>
                 </div>
+              </div>
 
+              <div className="register-benefit">
+                <div className="benefit-icon">✓</div>
+                <div>
+                  <strong>Track Your Progress</strong>
+                  <span>Manage applications from your dashboard.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div className="register-right">
+          <div className="register-form-card">
+
+            <div className="register-form-header">
+              <div className="register-form-icon">✎</div>
+              <h2>Create Account</h2>
+              <p>Register as a Candidate</p>
             </div>
 
+            <form className="register-form" onSubmit={handleSubmit}>
+
+              <div className="register-field">
+                <label>Full Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Enter your full name"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="register-field">
+                <label>Email Address</label>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Enter your email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="register-field">
+                <label>Password</label>
+                <div className="register-password">
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="Create a password"
+                    value={form.password}
+                    onChange={handleChange}
+                    required
+                  />
+                  <span>◉</span>
+                </div>
+              </div>
+
+              <div className="register-field">
+                <label>Confirm Password</label>
+                <div className="register-password">
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    placeholder="Confirm your password"
+                    value={form.confirmPassword}
+                    onChange={handleChange}
+                    required
+                  />
+                  <span>◉</span>
+                </div>
+              </div>
+
+              <div className="register-terms">
+                <input type="checkbox" id="terms" required />
+                <label htmlFor="terms">
+                  I agree to the Terms & Conditions
+                </label>
+              </div>
+
+              <button type="submit" className="register-button">
+                Create Account
+              </button>
+
+              <div className="register-login">
+                <span>Already have an account?</span>
+                <Link to="/login">Login here</Link>
+              </div>
+
+            </form>
+          </div>
         </div>
-    );
+
+      </div>
+    </div>
+  );
 }
 
 export default Register;

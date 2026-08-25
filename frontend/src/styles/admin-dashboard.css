@@ -1,1159 +1,367 @@
-
-/* =========================================================
+/* =========================
    ADMIN DASHBOARD
-   Job & Internship Management Portal
-========================================================= */
+========================= */
 
-.admin-dashboard {
-    min-height: 100vh;
-    width: 100%;
-    display: flex;
-    background: #f8fafc;
-    color: #0f172a;
-    font-family: "Inter", Arial, sans-serif;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI",sans-serif;
 }
 
+body{
+  background:#f4f7fb;
+}
 
-/* =========================================================
+.admin-dashboard{
+  display:flex;
+  min-height:100vh;
+  background:#f4f7fb;
+}
+
+/* =========================
    SIDEBAR
-========================================================= */
+========================= */
 
-.admin-sidebar {
-    width: 240px;
-    min-width: 240px;
-    height: 100vh;
-
-    background: #08265c;
-
-    display: flex;
-    flex-direction: column;
-
-    padding: 24px 14px;
-
-    position: sticky;
-    top: 0;
-
-    align-self: flex-start;
-
-    box-sizing: border-box;
+.sidebar{
+  width:240px;
+  background:linear-gradient(180deg,#0f172a,#0b2447);
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  padding:20px 15px;
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
 }
 
-
-/* =========================================================
-   SIDEBAR BRAND
-========================================================= */
-
-.admin-sidebar-brand {
-    display: flex;
-    align-items: center;
-
-    gap: 11px;
-
-    padding: 4px 10px 24px;
-
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+.logo{
+  margin-bottom:35px;
 }
 
-.admin-brand-icon {
-    width: 40px;
-    height: 40px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    background: #2563eb;
-
-    border-radius: 10px;
-
-    font-size: 19px;
-
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+.logo h2{
+  font-size:24px;
+  margin-bottom:5px;
 }
 
-.admin-sidebar-brand h3 {
-    margin: 0;
-
-    color: #ffffff;
-
-    font-size: 18px;
-    font-weight: 700;
+.logo p{
+  font-size:13px;
+  color:#cbd5e1;
 }
 
-.admin-sidebar-brand span {
-    display: block;
-
-    margin-top: 3px;
-
-    color: #94a3b8;
-
-    font-size: 11px;
+.sidebar button{
+  border:none;
+  background:transparent;
+  color:#e2e8f0;
+  text-align:left;
+  padding:13px 15px;
+  margin-bottom:8px;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:15px;
+  transition:.3s;
 }
 
-
-/* =========================================================
-   SIDEBAR NAVIGATION
-========================================================= */
-
-.admin-sidebar-nav {
-    display: flex;
-    flex-direction: column;
-
-    gap: 6px;
-
-    margin-top: 25px;
+.sidebar button:hover{
+  background:#2563eb;
 }
 
-.admin-nav-item {
-    min-height: 44px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 12px;
-
-    padding: 0 13px;
-
-    border-radius: 7px;
-
-    color: #cbd5e1;
-
-    font-size: 14px;
-    font-weight: 500;
-
-    text-decoration: none;
-
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        transform 0.2s ease;
+.logout{
+  margin-top:auto;
+  background:#dc2626 !important;
+  color:#fff !important;
 }
 
-.admin-nav-item:hover {
-    background: rgba(255, 255, 255, 0.09);
-
-    color: #ffffff;
-
-    text-decoration: none;
-
-    transform: translateX(2px);
+.logout:hover{
+  background:#b91c1c !important;
 }
 
-.admin-nav-item.active {
-    background: #2563eb;
+/* =========================
+   MAIN
+========================= */
 
-    color: #ffffff;
-
-    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+.main{
+  flex:1;
+  margin-left:240px;
+  padding:30px;
 }
 
-.admin-nav-icon {
-    width: 21px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 16px;
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:25px;
 }
 
-
-/* =========================================================
-   SIDEBAR BOTTOM
-========================================================= */
-
-.admin-sidebar-bottom {
-    margin-top: auto;
-
-    padding-top: 18px;
-
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+.topbar h1{
+  font-size:28px;
+  color:#1e293b;
 }
 
-.admin-nav-item.logout:hover {
-    background: rgba(239, 68, 68, 0.15);
-
-    color: #fca5a5;
+.admin{
+  background:#fff;
+  padding:10px 18px;
+  border-radius:30px;
+  box-shadow:0 3px 12px rgba(0,0,0,.08);
+  font-weight:600;
 }
 
+/* =========================
+   DASHBOARD CARDS
+========================= */
 
-/* =========================================================
-   MAIN CONTENT
-========================================================= */
-
-.admin-main {
-    flex: 1;
-
-    min-width: 0;
-
-    min-height: 100vh;
-
-    padding: 0 32px 45px;
-
-    box-sizing: border-box;
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:20px;
 }
 
-
-/* =========================================================
-   TOPBAR
-========================================================= */
-
-.admin-topbar {
-    min-height: 88px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 20px;
-
-    border-bottom: 1px solid #e5eaf2;
+.card{
+  color:#fff;
+  padding:25px;
+  border-radius:16px;
+  box-shadow:0 8px 20px rgba(0,0,0,.1);
+  transition:.3s;
 }
 
-.admin-topbar h1 {
-    margin: 0;
-
-    color: #0f172a;
-
-    font-size: 28px;
-    font-weight: 750;
-
-    letter-spacing: -0.4px;
+.card:hover{
+  transform:translateY(-5px);
 }
 
-.admin-topbar p {
-    margin: 6px 0 0;
-
-    color: #64748b;
-
-    font-size: 14px;
+.card h2{
+  font-size:34px;
+  margin-bottom:8px;
 }
 
-
-/* =========================================================
-   ADMIN PROFILE
-========================================================= */
-
-.admin-profile {
-    display: flex;
-    align-items: center;
-
-    gap: 10px;
-
-    padding: 6px 8px;
-
-    border-radius: 8px;
-
-    cursor: pointer;
-
-    transition: background 0.2s ease;
+.card p{
+  font-size:15px;
 }
 
-.admin-profile:hover {
-    background: #f1f5f9;
-}
-
-.admin-avatar {
-    width: 40px;
-    height: 40px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    background: #dbeafe;
-
-    color: #1d4ed8;
-
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.admin-profile-info {
-    display: flex;
-    flex-direction: column;
-
-    gap: 2px;
-}
-
-.admin-profile-info strong {
-    color: #1e293b;
-
-    font-size: 14px;
-}
-
-.admin-profile-info span {
-    color: #94a3b8;
-
-    font-size: 12px;
-}
-
-.admin-profile-arrow {
-    margin-left: 3px;
-
-    color: #64748b;
-
-    font-size: 11px;
-}
-
-
-/* =========================================================
-   STATISTICS GRID
-========================================================= */
-
-.admin-stat-grid {
-    display: grid;
-
-    grid-template-columns: repeat(4, 1fr);
-
-    gap: 16px;
-
-    margin-top: 24px;
-}
-
-
-/* =========================================================
-   STAT CARD
-========================================================= */
-
-.admin-stat-card {
-    min-height: 112px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 15px;
-
-    padding: 20px;
-
-    background: #ffffff;
-
-    border: 1px solid #e5eaf2;
-
-    border-radius: 10px;
-
-    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.035);
-
-    box-sizing: border-box;
-
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.admin-stat-card:hover {
-    transform: translateY(-3px);
-
-    box-shadow: 0 9px 22px rgba(15, 23, 42, 0.08);
-}
-
-
-/* =========================================================
-   STAT ICON
-========================================================= */
-
-.admin-stat-icon {
-    width: 50px;
-    height: 50px;
-
-    min-width: 50px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 10px;
-
-    font-size: 19px;
-}
-
-
-/* Blue */
-
-.admin-stat-card.blue .admin-stat-icon {
-    background: #eff6ff;
-    color: #2563eb;
-}
-
-
-/* Green */
-
-.admin-stat-card.green .admin-stat-icon {
-    background: #ecfdf5;
-    color: #059669;
-}
-
-
-/* Orange */
-
-.admin-stat-card.orange .admin-stat-icon {
-    background: #fff7ed;
-    color: #ea580c;
-}
-
-
-/* Purple */
-
-.admin-stat-card.purple .admin-stat-icon {
-    background: #f5f3ff;
-    color: #7c3aed;
-}
-
-
-/* =========================================================
-   STAT CONTENT
-========================================================= */
-
-.admin-stat-content {
-    display: flex;
-    flex-direction: column;
-
-    gap: 5px;
-}
-
-.admin-stat-content strong {
-    color: #0f172a;
-
-    font-size: 25px;
-    font-weight: 750;
-}
-
-.admin-stat-content span {
-    color: #64748b;
-
-    font-size: 13px;
-    font-weight: 500;
-}
-
-
-/* =========================================================
-   CONTENT GRID
-========================================================= */
-
-.admin-content-grid {
-    display: grid;
-
-    grid-template-columns: 1.55fr 1fr;
-
-    gap: 18px;
-
-    margin-top: 22px;
-}
-
-
-/* =========================================================
+.blue{background:#2563eb;}
+.green{background:#16a34a;}
+.orange{background:#f59e0b;}
+.purple{background:#7c3aed;}
+
+/* =========================
    PANEL
-========================================================= */
+========================= */
 
-.admin-panel {
-    background: #ffffff;
-
-    border: 1px solid #e5eaf2;
-
-    border-radius: 10px;
-
-    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.035);
-
-    overflow: hidden;
+.panel{
+  background:#fff;
+  margin-top:25px;
+  border-radius:16px;
+  padding:22px;
+  box-shadow:0 4px 15px rgba(0,0,0,.08);
 }
 
-
-/* =========================================================
-   PANEL HEADER
-========================================================= */
-
-.admin-panel-header {
-    min-height: 70px;
-
-    padding: 18px 20px;
-
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-
-    border-bottom: 1px solid #eef2f7;
-
-    box-sizing: border-box;
+.panel-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
 }
 
-.admin-panel-header h2 {
-    margin: 0;
-
-    color: #0f172a;
-
-    font-size: 18px;
-    font-weight: 700;
+.panel h2{
+  color:#1e293b;
 }
 
-.admin-panel-header p {
-    margin: 5px 0 0;
+/* =========================
+   FORM
+========================= */
 
-    color: #94a3b8;
-
-    font-size: 13px;
+.form{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:15px;
+  margin-bottom:25px;
 }
 
-
-/* =========================================================
-   MORE BUTTON
-========================================================= */
-
-.admin-more-button {
-    width: 32px;
-    height: 32px;
-
-    border: 0;
-
-    background: transparent;
-
-    color: #64748b;
-
-    font-size: 20px;
-
-    cursor: pointer;
-
-    border-radius: 5px;
-
-    transition: background 0.2s ease;
+.form input,
+.form select{
+  padding:12px;
+  border:1px solid #d1d5db;
+  border-radius:8px;
+  outline:none;
+  font-size:14px;
 }
 
-.admin-more-button:hover {
-    background: #f1f5f9;
+.form input:focus,
+.form select:focus{
+  border-color:#2563eb;
 }
 
-
-/* =========================================================
-   CHART
-========================================================= */
-
-.admin-chart {
-    height: 280px;
-
-    display: flex;
-
-    padding: 20px 18px 12px;
-
-    box-sizing: border-box;
+.form button{
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+  transition:.3s;
 }
 
-
-/* =========================================================
-   Y AXIS
-========================================================= */
-
-.chart-y-axis {
-    width: 40px;
-
-    height: 220px;
-
-    display: flex;
-    flex-direction: column;
-
-    justify-content: space-between;
-
-    padding-bottom: 2px;
-
-    box-sizing: border-box;
+.form button:hover{
+  background:#1d4ed8;
 }
 
-.chart-y-axis span {
-    color: #94a3b8;
+/* =========================
+   TABLE
+========================= */
 
-    font-size: 12px;
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
 }
 
-
-/* =========================================================
-   CHART AREA
-========================================================= */
-
-.chart-area {
-    flex: 1;
-
-    height: 220px;
-
-    position: relative;
-
-    border-left: 1px solid #e2e8f0;
-
-    border-bottom: 1px solid #e2e8f0;
+thead{
+  background:#eff6ff;
 }
 
-.chart-grid-line {
-    position: absolute;
-
-    left: 0;
-
-    width: 100%;
-
-    height: 1px;
-
-    border-top: 1px dashed #e8edf3;
+th{
+  padding:14px;
+  text-align:left;
+  color:#1e40af;
+  font-size:14px;
 }
 
-.line-1 {
-    top: 0;
+td{
+  padding:14px;
+  border-bottom:1px solid #e5e7eb;
+  color:#374151;
 }
 
-.line-2 {
-    top: 25%;
+tbody tr:hover{
+  background:#f9fafb;
 }
 
-.line-3 {
-    top: 50%;
+/* =========================
+   BUTTONS
+========================= */
+
+.edit{
+  background:#f59e0b;
+  color:#fff;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  margin-right:6px;
 }
 
-.line-4 {
-    top: 75%;
+.edit:hover{
+  background:#d97706;
 }
 
-.line-5 {
-    top: 100%;
+.delete{
+  background:#ef4444;
+  color:#fff;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
 }
 
-
-/* =========================================================
-   SVG CHART
-========================================================= */
-
-.application-chart {
-    position: absolute;
-
-    inset: 0;
-
-    width: 100%;
-    height: 100%;
-
-    overflow: visible;
+.delete:hover{
+  background:#dc2626;
 }
 
-.application-chart polyline {
-    fill: none;
-
-    stroke: #2563eb;
-
-    stroke-width: 3;
-
-    vector-effect: non-scaling-stroke;
+.view{
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
 }
 
-.application-chart circle {
-    fill: #ffffff;
+/* =========================
+   STATUS
+========================= */
 
-    stroke: #2563eb;
-
-    stroke-width: 3;
-
-    vector-effect: non-scaling-stroke;
+select{
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #cbd5e1;
 }
 
-
-/* =========================================================
-   X AXIS
-========================================================= */
-
-.chart-x-axis {
-    position: absolute;
-
-    left: 0;
-    right: 0;
-
-    bottom: -28px;
-
-    display: flex;
-
-    justify-content: space-between;
+.status-pending{
+  color:#d97706;
+  font-weight:600;
 }
 
-.chart-x-axis span {
-    color: #94a3b8;
-
-    font-size: 12px;
+.status-selected{
+  color:#16a34a;
+  font-weight:600;
 }
 
-
-/* =========================================================
-   RECENT APPLICATIONS TABLE
-========================================================= */
-
-.admin-table-wrapper {
-    width: 100%;
-
-    overflow-x: auto;
+.status-rejected{
+  color:#dc2626;
+  font-weight:600;
 }
 
-.admin-table {
-    width: 100%;
+/* =========================
+   SEARCH BOX
+========================= */
 
-    border-collapse: collapse;
+.search-box{
+  width:260px;
+  margin-bottom:18px;
 }
 
-.admin-table th {
-    padding: 14px 15px;
-
-    background: #f8fafc;
-
-    color: #64748b;
-
-    text-align: left;
-
-    font-size: 13px;
-    font-weight: 650;
-
-    white-space: nowrap;
+.search-box input{
+  width:100%;
+  padding:11px 15px;
+  border:1px solid #d1d5db;
+  border-radius:8px;
 }
 
-.admin-table td {
-    padding: 14px 15px;
+/* =========================
+   RESPONSIVE
+========================= */
 
-    color: #334155;
+@media(max-width:900px){
 
-    border-top: 1px solid #eef2f7;
+  .sidebar{
+    width:70px;
+    align-items:center;
+  }
 
-    font-size: 13px;
+  .logo h2,
+  .logo p{
+    display:none;
+  }
 
-    white-space: nowrap;
+  .sidebar button{
+    text-align:center;
+    font-size:12px;
+    padding:12px 8px;
+  }
+
+  .main{
+    margin-left:70px;
+  }
 }
 
-.admin-table tbody tr {
-    transition: background 0.15s ease;
-}
-
-.admin-table tbody tr:hover {
-    background: #f8fafc;
-}
-
-
-/* =========================================================
-   STATUS BADGES
-========================================================= */
-
-.status {
-    display: inline-flex;
-
-    align-items: center;
-    justify-content: center;
-
-    padding: 5px 9px;
-
-    border-radius: 5px;
-
-    font-size: 12px;
-
-    font-weight: 600;
-}
-
-.status.selected {
-    color: #047857;
-
-    background: #d1fae5;
-}
-
-.status.pending {
-    color: #b45309;
-
-    background: #fef3c7;
-}
-
-.status.applied {
-    color: #1d4ed8;
-
-    background: #dbeafe;
-}
-
-.status.interview {
-    color: #c2410c;
-
-    background: #ffedd5;
-}
-
-
-/* =========================================================
-   VIEW ALL BUTTON
-========================================================= */
-
-.admin-view-button {
-    display: block;
-
-    margin: 16px auto 20px;
-
-    padding: 9px 17px;
-
-    border: 1px solid #93c5fd;
-
-    border-radius: 5px;
-
-    background: #ffffff;
-
-    color: #2563eb;
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        border-color 0.2s ease;
-}
-
-.admin-view-button:hover {
-    background: #2563eb;
-
-    border-color: #2563eb;
-
-    color: #ffffff;
-}
-
-
-/* =========================================================
-   LARGE TABLET
-========================================================= */
-
-@media (max-width: 1200px) {
-
-    .admin-sidebar {
-        width: 220px;
-        min-width: 220px;
-    }
-
-    .admin-main {
-        padding-left: 24px;
-        padding-right: 24px;
-    }
-
-    .admin-stat-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .admin-content-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-
-/* =========================================================
-   TABLET
-========================================================= */
-
-@media (max-width: 900px) {
-
-    .admin-sidebar {
-        width: 200px;
-        min-width: 200px;
-    }
-
-    .admin-sidebar-brand {
-        padding-left: 7px;
-        padding-right: 7px;
-    }
-
-    .admin-nav-item {
-        font-size: 13px;
-    }
-
-    .admin-main {
-        padding-left: 18px;
-        padding-right: 18px;
-    }
-
-    .admin-topbar h1 {
-        font-size: 25px;
-    }
-}
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 768px) {
-
-    .admin-dashboard {
-        display: block;
-
-        min-height: 100vh;
-    }
-
-
-    /* Sidebar */
-
-    .admin-sidebar {
-        position: relative;
-
-        top: 0;
-
-        width: 100%;
-        min-width: 100%;
-
-        height: auto;
-        min-height: auto;
-
-        padding: 18px;
-
-        box-sizing: border-box;
-    }
-
-    .admin-sidebar-brand {
-        padding-bottom: 18px;
-    }
-
-    .admin-sidebar-nav {
-        flex-direction: row;
-
-        flex-wrap: wrap;
-
-        gap: 7px;
-
-        margin-top: 18px;
-    }
-
-    .admin-nav-item {
-        flex: 1;
-
-        min-width: 120px;
-
-        min-height: 42px;
-
-        font-size: 13px;
-    }
-
-    .admin-sidebar-bottom {
-        margin-top: 15px;
-
-        padding-top: 15px;
-    }
-
-
-    /* Main */
-
-    .admin-main {
-        min-height: auto;
-
-        padding: 0 15px 30px;
-    }
-
-
-    /* Topbar */
-
-    .admin-topbar {
-        min-height: 80px;
-    }
-
-    .admin-topbar h1 {
-        font-size: 23px;
-    }
-
-    .admin-topbar p {
-        font-size: 13px;
-    }
-
-
-    /* Statistics */
-
-    .admin-stat-grid {
-        grid-template-columns: repeat(2, 1fr);
-
-        gap: 12px;
-
-        margin-top: 18px;
-    }
-
-    .admin-stat-card {
-        padding: 16px;
-    }
-
-    .admin-stat-icon {
-        width: 44px;
-        height: 44px;
-
-        min-width: 44px;
-    }
-
-    .admin-stat-content strong {
-        font-size: 21px;
-    }
-
-    .admin-stat-content span {
-        font-size: 12px;
-    }
-
-
-    /* Panels */
-
-    .admin-content-grid {
-        margin-top: 16px;
-    }
-
-    .admin-panel-header h2 {
-        font-size: 17px;
-    }
-
-    .admin-panel-header p {
-        font-size: 12px;
-    }
-
-
-    /* Table */
-
-    .admin-table th {
-        font-size: 12px;
-    }
-
-    .admin-table td {
-        font-size: 12px;
-    }
-}
-
-
-/* =========================================================
-   SMALL MOBILE
-========================================================= */
-
-@media (max-width: 480px) {
-
-    .admin-sidebar {
-        padding: 15px;
-    }
-
-    .admin-sidebar-brand {
-        gap: 9px;
-    }
-
-    .admin-brand-icon {
-        width: 36px;
-        height: 36px;
-
-        font-size: 17px;
-    }
-
-    .admin-sidebar-brand h3 {
-        font-size: 16px;
-    }
-
-    .admin-sidebar-brand span {
-        font-size: 10px;
-    }
-
-
-    /* Navigation */
-
-    .admin-sidebar-nav {
-        display: grid;
-
-        grid-template-columns: repeat(2, 1fr);
-
-        gap: 6px;
-    }
-
-    .admin-nav-item {
-        min-width: 0;
-
-        padding: 0 9px;
-
-        font-size: 12px;
-    }
-
-
-    /* Main */
-
-    .admin-main {
-        padding: 0 12px 25px;
-    }
-
-
-    /* Header */
-
-    .admin-topbar {
-        align-items: flex-start;
-
-        flex-direction: column;
-
-        gap: 14px;
-
-        padding: 18px 0;
-    }
-
-    .admin-topbar h1 {
-        font-size: 21px;
-    }
-
-    .admin-topbar p {
-        font-size: 12px;
-    }
-
-    .admin-profile {
-        width: 100%;
-    }
-
-
-    /* Statistics */
-
-    .admin-stat-grid {
-        grid-template-columns: 1fr;
-
-        gap: 10px;
-    }
-
-    .admin-stat-card {
-        min-height: 90px;
-
-        padding: 15px;
-    }
-
-    .admin-stat-content strong {
-        font-size: 22px;
-    }
-
-
-    /* Chart */
-
-    .admin-chart {
-        height: 250px;
-
-        padding-left: 10px;
-        padding-right: 10px;
-    }
-
-    .chart-y-axis {
-        width: 32px;
-    }
-
-    .chart-y-axis span {
-        font-size: 10px;
-    }
-
-    .chart-x-axis span {
-        font-size: 9px;
-    }
-
-
-    /* Table */
-
-    .admin-table th,
-    .admin-table td {
-        padding: 11px 9px;
-    }
-
-    .admin-table th {
-        font-size: 11px;
-    }
-
-    .admin-table td {
-        font-size: 11px;
-    }
-
-    .status {
-        padding: 5px 7px;
-
-        font-size: 10px;
-    }
-
-    .admin-view-button {
-        font-size: 12px;
-    }
+@media(max-width:768px){
+
+  .main{
+    padding:15px;
+  }
+
+  .topbar{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:10px;
+  }
+
+  .form{
+    grid-template-columns:1fr;
+  }
+
+  table{
+    display:block;
+    overflow-x:auto;
+  }
 }
