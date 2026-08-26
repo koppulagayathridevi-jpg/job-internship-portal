@@ -6,8 +6,6 @@ function JobCard({ job }) {
     return (
         <div className="job-card">
 
-            {/* Header */}
-
             <div className="job-card-header">
 
                 <h3>
@@ -21,14 +19,10 @@ function JobCard({ job }) {
             </div>
 
 
-            {/* Company */}
-
             <div className="job-company">
                 {job.company}
             </div>
 
-
-            {/* Location */}
 
             <div className="job-location">
                 <span>📍</span>
@@ -36,18 +30,20 @@ function JobCard({ job }) {
             </div>
 
 
-            {/* Skills */}
-
             <div className="job-skills-preview">
+
                 <span>⚙</span>
-                {job.skills}
+
+                {Array.isArray(job.skills)
+                    ? job.skills.join(", ")
+                    : job.skills
+                }
+
             </div>
 
 
-            {/* Button */}
-
             <Link
-                to={`/jobs/${job.id}`}
+                to={`/jobs/${job._id}`}
                 className="job-view-button"
             >
                 View Details

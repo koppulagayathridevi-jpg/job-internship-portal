@@ -1,28 +1,176 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/candidate-dashboard.css";
 
 function CandidateDashboard() {
-
     const navigate = useNavigate();
 
+    // =====================================================
+    // STATE
+    // =====================================================
+
+    const [applications, setApplications] = useState([]);
+    const [applicationsLoading, setApplicationsLoading] = useState(true);
+    const [applicationsError, setApplicationsError] = useState("");
+
+
+    // =====================================================
+    // FETCH CANDIDATE APPLICATIONS
+    // =====================================================
+
+    useEffect(() => {
+        const fetchApplications = async () => {
+            try {
+                const token = localStorage.getItem("token");
+
+                if (!token) {
+                    setApplicationsError(
+                        "Please login to view your applications."
+                    );
+
+                    setApplicationsLoading(false);
+                    return;
+                }
+
+                const response = await fetch(
+                    "http://localhost:5000/api/applications/my",
+                    {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+
+                const data = await response.json();
+
+                console.log(
+                    "Candidate Applications:",
+                    data
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.message ||
+                        "Failed to fetch applications"
+                    );
+                }
+
+                setApplications(
+                    data.applications || []
+                );
+
+            } catch (error) {
+                console.error(
+                    "Candidate Applications Error:",
+                    error
+                );
+
+                setApplicationsError(
+                    error.message ||
+                    "Unable to load applications."
+                );
+
+            } finally {
+                setApplicationsLoading(false);
+            }
+        };
+
+        fetchApplications();
+    }, []);
+
+
+    // =====================================================
+    // LOGOUT
+    // =====================================================
+
     const handleLogout = () => {
-        localStorage.removeItem("access");
-        localStorage.removeItem("refresh");
+        localStorage.removeItem("token");
+        localStorage.removeItem("isLoggedIn");
         localStorage.removeItem("user");
 
         navigate("/login");
     };
 
+
+    // =====================================================
+    // APPLICATION STATISTICS
+    // =====================================================
+
+    const totalApplications =
+        applications.length;
+
+    const shortlistedApplications =
+        applications.filter(
+            (application) =>
+                application.status?.toLowerCase() ===
+                "shortlisted"
+        ).length;
+
+    const interviewApplications =
+        applications.filter(
+            (application) =>
+                application.status?.toLowerCase() ===
+                "interview"
+        ).length;
+
+    const selectedApplications =
+        applications.filter(
+            (application) =>
+                application.status?.toLowerCase() ===
+                "selected"
+        ).length;
+
+
+    // =====================================================
+    // STATUS CLASS
+    // =====================================================
+
+    const getStatusClass = (status) => {
+        if (!status) {
+            return "candidate-status-applied";
+        }
+
+        return `candidate-status-${status
+            .toLowerCase()
+            .replace(/\s+/g, "-")}`;
+    };
+
+
+    // =====================================================
+    // FORMAT DATE
+    // =====================================================
+
+    const formatDate = (date) => {
+        if (!date) {
+            return "N/A";
+        }
+
+        return new Date(date).toLocaleDateString(
+            "en-IN",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+            }
+        );
+    };
+
+
+    // =====================================================
+    // DASHBOARD
+    // =====================================================
+
     return (
         <div className="candidate-dashboard">
 
-            {/* =====================================================
+            {/* =================================================
                 SIDEBAR
-            ===================================================== */}
+            ================================================= */}
 
             <aside className="candidate-sidebar">
 
-                {/* BRAND */}
+                {/* Logo */}
 
                 <div className="candidate-sidebar-brand">
 
@@ -32,16 +180,13 @@ function CandidateDashboard() {
 
                     <div>
                         <h3>JobPortal</h3>
-
-                        <span>
-                            Job & Internship Portal
-                        </span>
+                        <span>Candidate</span>
                     </div>
 
                 </div>
 
 
-                {/* NAVIGATION */}
+                {/* Navigation */}
 
                 <nav className="candidate-sidebar-nav">
 
@@ -50,12 +195,22 @@ function CandidateDashboard() {
                         className="candidate-nav-item active"
                     >
                         <span className="candidate-nav-icon">
-                            ▦
+                            🏠
                         </span>
 
-                        <span>
-                            Dashboard
+                        Dashboard
+                    </Link>
+
+
+                    <Link
+                        to="/jobs"
+                        className="candidate-nav-item"
+                    >
+                        <span className="candidate-nav-icon">
+                            💼
                         </span>
+
+                        Browse Jobs
                     </Link>
 
 
@@ -64,26 +219,10 @@ function CandidateDashboard() {
                         className="candidate-nav-item"
                     >
                         <span className="candidate-nav-icon">
-                            ▤
+                            📄
                         </span>
 
-                        <span>
-                            My Applications
-                        </span>
-                    </Link>
-
-
-                    <Link
-                        to="/saved-jobs"
-                        className="candidate-nav-item"
-                    >
-                        <span className="candidate-nav-icon">
-                            ♡
-                        </span>
-
-                        <span>
-                            Saved Jobs
-                        </span>
+                        My Applications
                     </Link>
 
 
@@ -92,48 +231,28 @@ function CandidateDashboard() {
                         className="candidate-nav-item"
                     >
                         <span className="candidate-nav-icon">
-                            ♙
+                            👤
                         </span>
 
-                        <span>
-                            Profile
-                        </span>
-                    </Link>
-
-
-                    <Link
-                        to="/change-password"
-                        className="candidate-nav-item"
-                    >
-                        <span className="candidate-nav-icon">
-                            ◉
-                        </span>
-
-                        <span>
-                            Change Password
-                        </span>
+                        My Profile
                     </Link>
 
                 </nav>
 
 
-                {/* LOGOUT */}
+                {/* Sidebar Bottom */}
 
                 <div className="candidate-sidebar-bottom">
 
                     <button
+                        className="candidate-logout-button"
                         onClick={handleLogout}
-                        className="candidate-nav-item logout"
                     >
-
-                        <span className="candidate-nav-icon">
-                            ←
-                        </span>
-
                         <span>
-                            Logout
+                            🚪
                         </span>
 
+                        Logout
                     </button>
 
                 </div>
@@ -141,11 +260,11 @@ function CandidateDashboard() {
             </aside>
 
 
-            {/* =====================================================
+            {/* =================================================
                 MAIN CONTENT
-            ===================================================== */}
+            ================================================= */}
 
-            <main className="candidate-main">
+            <main className="candidate-main-content">
 
 
                 {/* =================================================
@@ -157,384 +276,124 @@ function CandidateDashboard() {
                     <div>
 
                         <h1>
-                            Welcome to JobPortal 👋
+                            Candidate Dashboard
                         </h1>
 
                         <p>
-                            Start your career journey by completing your
-                            profile and exploring job opportunities.
+                            Track your job applications
+                            and discover new opportunities.
                         </p>
 
                     </div>
 
 
-                    {/* PROFILE */}
+                    <div className="candidate-topbar-actions">
 
-                    <Link
-                        to="/profile"
-                        className="candidate-profile"
-                    >
+                        <Link
+                            to="/jobs"
+                            className="candidate-primary-button"
+                        >
+                            + Browse Jobs
+                        </Link>
 
-                        <div className="candidate-avatar">
-                            U
-                        </div>
-
-                        <div className="candidate-profile-info">
-
-                            <strong>
-                                New User
-                            </strong>
-
-                            <span>
-                                Candidate
-                            </span>
-
-                        </div>
-
-                        <span className="candidate-profile-arrow">
-                            ▼
-                        </span>
-
-                    </Link>
+                    </div>
 
                 </header>
-
-
-
-                {/* =================================================
-                    WELCOME CARD
-                ================================================= */}
-
-                <section className="candidate-welcome-card">
-
-                    <div className="candidate-welcome-content">
-
-                        <span className="candidate-welcome-label">
-                            GET STARTED
-                        </span>
-
-                        <h2>
-                            Build your profile and find your dream job
-                        </h2>
-
-                        <p>
-                            Complete your profile to get personalized
-                            job recommendations and increase your chances
-                            of finding the right opportunity.
-                        </p>
-
-                        <div className="candidate-welcome-buttons">
-
-                            <Link
-                                to="/profile"
-                                className="candidate-primary-button"
-                            >
-                                Complete Profile
-                            </Link>
-
-                            <Link
-                                to="/jobs"
-                                className="candidate-secondary-button"
-                            >
-                                Browse Jobs
-                            </Link>
-
-                        </div>
-
-                    </div>
-
-
-                    <div className="candidate-welcome-icon">
-                        🚀
-                    </div>
-
-                </section>
-
 
 
                 {/* =================================================
                     STATISTICS
                 ================================================= */}
 
-                <section className="candidate-stat-grid">
+                <section className="candidate-stats-grid">
 
 
-                    {/* APPLICATIONS */}
+                    {/* Applications */}
 
-                    <div className="candidate-stat-card blue">
+                    <div className="candidate-stat-card">
 
-                        <div className="candidate-stat-icon">
+                        <div className="candidate-stat-icon applications">
                             📄
                         </div>
 
-                        <div className="candidate-stat-content">
-
-                            <strong>
-                                0
-                            </strong>
+                        <div className="candidate-stat-info">
 
                             <span>
                                 Applications
                             </span>
 
+                            <strong>
+                                {totalApplications}
+                            </strong>
+
                         </div>
 
                     </div>
 
 
+                    {/* Shortlisted */}
 
-                    {/* SHORTLISTED */}
+                    <div className="candidate-stat-card">
 
-                    <div className="candidate-stat-card green">
-
-                        <div className="candidate-stat-icon">
+                        <div className="candidate-stat-icon shortlisted">
                             ✓
                         </div>
 
-                        <div className="candidate-stat-content">
-
-                            <strong>
-                                0
-                            </strong>
+                        <div className="candidate-stat-info">
 
                             <span>
                                 Shortlisted
                             </span>
 
+                            <strong>
+                                {shortlistedApplications}
+                            </strong>
+
                         </div>
 
                     </div>
 
 
+                    {/* Interviews */}
 
-                    {/* INTERVIEWS */}
+                    <div className="candidate-stat-card">
 
-                    <div className="candidate-stat-card orange">
-
-                        <div className="candidate-stat-icon">
+                        <div className="candidate-stat-icon interviews">
                             👥
                         </div>
 
-                        <div className="candidate-stat-content">
-
-                            <strong>
-                                0
-                            </strong>
+                        <div className="candidate-stat-info">
 
                             <span>
                                 Interviews
                             </span>
 
-                        </div>
-
-                    </div>
-
-
-
-                    {/* OFFERS */}
-
-                    <div className="candidate-stat-card purple">
-
-                        <div className="candidate-stat-icon">
-                            ★
-                        </div>
-
-                        <div className="candidate-stat-content">
-
                             <strong>
-                                0
+                                {interviewApplications}
                             </strong>
 
+                        </div>
+
+                    </div>
+
+
+                    {/* Selected */}
+
+                    <div className="candidate-stat-card">
+
+                        <div className="candidate-stat-icon offers">
+                            ⭐
+                        </div>
+
+                        <div className="candidate-stat-info">
+
                             <span>
-                                Offers
+                                Selected
                             </span>
 
-                        </div>
-
-                    </div>
-
-                </section>
-
-
-
-                {/* =================================================
-                    MAIN CONTENT GRID
-                ================================================= */}
-
-                <section className="candidate-content-grid">
-
-
-                    {/* =================================================
-                        RECENT APPLICATIONS
-                    ================================================= */}
-
-                    <div className="candidate-panel applications-panel">
-
-                        <div className="candidate-panel-header">
-
-                            <div>
-
-                                <h2>
-                                    Recent Applications
-                                </h2>
-
-                                <p>
-                                    Track your job applications here
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        {/* EMPTY APPLICATION STATE */}
-
-                        <div className="candidate-empty-state">
-
-                            <div className="candidate-empty-icon">
-                                📄
-                            </div>
-
-                            <h3>
-                                No applications yet
-                            </h3>
-
-                            <p>
-                                You haven't applied for any jobs yet.
-                                Explore available opportunities and
-                                start applying today.
-                            </p>
-
-                            <Link
-                                to="/jobs"
-                                className="candidate-primary-button"
-                            >
-                                Browse Jobs
-                            </Link>
-
-                        </div>
-
-                    </div>
-
-
-
-                    {/* =================================================
-                        PROFILE CARD
-                    ================================================= */}
-
-                    <div className="candidate-panel profile-panel">
-
-                        <div className="candidate-panel-header">
-
-                            <div>
-
-                                <h2>
-                                    My Profile
-                                </h2>
-
-                                <p>
-                                    Complete your profile
-                                </p>
-
-                            </div>
-
-                        </div>
-
-
-                        <div className="candidate-profile-card">
-
-                            <div className="candidate-large-avatar">
-                                U
-                            </div>
-
-                            <h3>
-                                New User
-                            </h3>
-
-                            <p>
-                                Complete your profile
-                            </p>
-
-
-                            {/* PROFILE COMPLETION */}
-
-                            <div className="candidate-profile-progress">
-
-                                <div className="candidate-progress-header">
-
-                                    <span>
-                                        Profile Completion
-                                    </span>
-
-                                    <strong>
-                                        20%
-                                    </strong>
-
-                                </div>
-
-                                <div className="candidate-progress-bar">
-
-                                    <div
-                                        className="candidate-progress-fill"
-                                        style={{ width: "20%" }}
-                                    ></div>
-
-                                </div>
-
-                            </div>
-
-
-                            {/* PROFILE INFORMATION */}
-
-                            <div className="candidate-profile-info-list">
-
-                                <div>
-
-                                    <strong>
-                                        Email
-                                    </strong>
-
-                                    <span>
-                                        Add your email
-                                    </span>
-
-                                </div>
-
-
-                                <div>
-
-                                    <strong>
-                                        Education
-                                    </strong>
-
-                                    <span>
-                                        Add your education
-                                    </span>
-
-                                </div>
-
-
-                                <div>
-
-                                    <strong>
-                                        Skills
-                                    </strong>
-
-                                    <span>
-                                        Add your skills
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-
-                            <Link
-                                to="/profile"
-                                className="candidate-primary-button"
-                            >
-                                Complete Profile
-                            </Link>
+                            <strong>
+                                {selectedApplications}
+                            </strong>
 
                         </div>
 
@@ -543,151 +402,394 @@ function CandidateDashboard() {
                 </section>
 
 
-
                 {/* =================================================
-                    RECOMMENDED JOBS
+                    QUICK ACTIONS
                 ================================================= */}
 
-                <section className="candidate-recommended">
+                <section className="candidate-quick-actions">
 
-                    <div className="candidate-section-heading">
+                    <div className="candidate-section-header">
 
                         <div>
 
                             <h2>
-                                Recommended Jobs
+                                Quick Actions
                             </h2>
 
                             <p>
-                                Start exploring opportunities that match
-                                your career interests.
+                                Manage your job search
+                                quickly.
                             </p>
 
                         </div>
 
+                    </div>
 
-                        <Link to="/jobs">
-                            View All Jobs →
+
+                    <div className="candidate-actions-grid">
+
+
+                        {/* Browse Jobs */}
+
+                        <Link
+                            to="/jobs"
+                            className="candidate-action-card"
+                        >
+
+                            <div className="candidate-action-icon">
+                                🔍
+                            </div>
+
+                            <div>
+
+                                <h3>
+                                    Browse Jobs
+                                </h3>
+
+                                <p>
+                                    Find your next
+                                    opportunity.
+                                </p>
+
+                            </div>
+
+                        </Link>
+
+
+                        {/* Applications */}
+
+                        <Link
+                            to="/applications"
+                            className="candidate-action-card"
+                        >
+
+                            <div className="candidate-action-icon">
+                                📄
+                            </div>
+
+                            <div>
+
+                                <h3>
+                                    My Applications
+                                </h3>
+
+                                <p>
+                                    Track your
+                                    applications.
+                                </p>
+
+                            </div>
+
+                        </Link>
+
+
+                        {/* Profile */}
+
+                        <Link
+                            to="/profile"
+                            className="candidate-action-card"
+                        >
+
+                            <div className="candidate-action-icon">
+                                👤
+                            </div>
+
+                            <div>
+
+                                <h3>
+                                    My Profile
+                                </h3>
+
+                                <p>
+                                    Update your
+                                    information.
+                                </p>
+
+                            </div>
+
                         </Link>
 
                     </div>
 
+                </section>
 
 
-                    {/* JOB GRID */}
+                {/* =================================================
+                    RECENT APPLICATIONS
+                ================================================= */}
 
-                    <div className="candidate-job-grid">
+                <section className="candidate-applications-section">
 
+                    <div className="candidate-section-header">
 
-                        {/* JOB 1 */}
+                        <div>
 
-                        <div className="candidate-job-card">
-
-                            <span className="candidate-job-badge">
-                                Internship
-                            </span>
-
-                            <h3>
-                                Frontend Developer Intern
-                            </h3>
-
-                            <h4>
-                                ABC Technologies
-                            </h4>
+                            <h2>
+                                Recent Applications
+                            </h2>
 
                             <p>
-                                📍 Hyderabad
+                                Your latest job applications.
                             </p>
-
-                            <div className="candidate-job-footer">
-
-                                <span>
-                                    ₹25,000 / month
-                                </span>
-
-                                <Link to="/jobs">
-                                    View Jobs
-                                </Link>
-
-                            </div>
 
                         </div>
 
 
+                        {applications.length > 0 && (
 
-                        {/* JOB 2 */}
+                            <Link
+                                to="/applications"
+                                className="candidate-view-all"
+                            >
+                                View All →
+                            </Link>
 
-                        <div className="candidate-job-card">
-
-                            <span className="candidate-job-badge fulltime">
-                                Full Time
-                            </span>
-
-                            <h3>
-                                Python Developer
-                            </h3>
-
-                            <h4>
-                                Tech Solutions
-                            </h4>
-
-                            <p>
-                                📍 Bangalore
-                            </p>
-
-                            <div className="candidate-job-footer">
-
-                                <span>
-                                    ₹4,50,000 / year
-                                </span>
-
-                                <Link to="/jobs">
-                                    View Jobs
-                                </Link>
-
-                            </div>
-
-                        </div>
-
-
-
-                        {/* JOB 3 */}
-
-                        <div className="candidate-job-card">
-
-                            <span className="candidate-job-badge remote">
-                                Remote
-                            </span>
-
-                            <h3>
-                                Backend Developer Intern
-                            </h3>
-
-                            <h4>
-                                Startup Labs
-                            </h4>
-
-                            <p>
-                                📍 Remote
-                            </p>
-
-                            <div className="candidate-job-footer">
-
-                                <span>
-                                    ₹20,000 / month
-                                </span>
-
-                                <Link to="/jobs">
-                                    View Jobs
-                                </Link>
-
-                            </div>
-
-                        </div>
+                        )}
 
                     </div>
 
+
+                    {/* Loading */}
+
+                    {applicationsLoading && (
+
+                        <div className="candidate-empty-state">
+
+                            <div className="candidate-empty-icon">
+                                ⏳
+                            </div>
+
+                            <h3>
+                                Loading applications...
+                            </h3>
+
+                            <p>
+                                Please wait while we
+                                load your applications.
+                            </p>
+
+                        </div>
+
+                    )}
+
+
+                    {/* Error */}
+
+                    {!applicationsLoading &&
+                        applicationsError && (
+
+                            <div className="candidate-empty-state">
+
+                                <div className="candidate-empty-icon">
+                                    ⚠️
+                                </div>
+
+                                <h3>
+                                    Unable to load applications
+                                </h3>
+
+                                <p>
+                                    {applicationsError}
+                                </p>
+
+                                <button
+                                    className="candidate-primary-button"
+                                    onClick={() =>
+                                        window.location.reload()
+                                    }
+                                >
+                                    Try Again
+                                </button>
+
+                            </div>
+
+                        )}
+
+
+                    {/* No Applications */}
+
+                    {!applicationsLoading &&
+                        !applicationsError &&
+                        applications.length === 0 && (
+
+                            <div className="candidate-empty-state">
+
+                                <div className="candidate-empty-icon">
+                                    📄
+                                </div>
+
+                                <h3>
+                                    No applications yet
+                                </h3>
+
+                                <p>
+                                    You haven't applied
+                                    for any jobs yet.
+                                    Explore available
+                                    opportunities and
+                                    start applying today.
+                                </p>
+
+                                <Link
+                                    to="/jobs"
+                                    className="candidate-primary-button"
+                                >
+                                    Browse Jobs
+                                </Link>
+
+                            </div>
+
+                        )}
+
+
+                    {/* Applications */}
+
+                    {!applicationsLoading &&
+                        !applicationsError &&
+                        applications.length > 0 && (
+
+                            <div className="candidate-applications-list">
+
+                                {applications
+                                    .slice(0, 5)
+                                    .map(
+                                        (application) => {
+
+                                            const job =
+                                                application.job;
+
+                                            return (
+
+                                                <div
+                                                    className="candidate-application-card"
+                                                    key={
+                                                        application._id
+                                                    }
+                                                >
+
+                                                    {/* Job Icon */}
+
+                                                    <div className="candidate-application-icon">
+                                                        💼
+                                                    </div>
+
+
+                                                    {/* Job Details */}
+
+                                                    <div className="candidate-application-info">
+
+                                                        <h3>
+                                                            {job?.title ||
+                                                                "Job Title"}
+                                                        </h3>
+
+                                                        <p>
+                                                            {job?.company ||
+                                                                "Company"}
+                                                        </p>
+
+                                                        <div className="candidate-application-meta">
+
+                                                            <span>
+                                                                📍{" "}
+                                                                {job?.location ||
+                                                                    "Location"}
+                                                            </span>
+
+                                                            <span>
+                                                                💰{" "}
+                                                                {job?.salary ||
+                                                                    "Salary not specified"}
+                                                            </span>
+
+                                                        </div>
+
+                                                    </div>
+
+
+                                                    {/* Application Status */}
+
+                                                    <div className="candidate-application-status">
+
+                                                        <span>
+                                                            Status
+                                                        </span>
+
+                                                        <strong
+                                                            className={getStatusClass(
+                                                                application.status
+                                                            )}
+                                                        >
+                                                            {application.status ||
+                                                                "Applied"}
+                                                        </strong>
+
+                                                        <small>
+                                                            Applied on{" "}
+                                                            {formatDate(
+                                                                application.createdAt
+                                                            )}
+                                                        </small>
+
+                                                    </div>
+
+                                                </div>
+
+                                            );
+
+                                        }
+                                    )}
+
+
+                                {/* View All */}
+
+                                <div className="candidate-applications-footer">
+
+                                    <Link
+                                        to="/applications"
+                                        className="candidate-primary-button"
+                                    >
+                                        View All Applications →
+                                    </Link>
+
+                                </div>
+
+                            </div>
+
+                        )}
+
                 </section>
+
+
+                {/* =================================================
+                    JOB SEARCH CTA
+                ================================================= */}
+
+                <section className="candidate-dashboard-cta">
+
+                    <div>
+
+                        <h2>
+                            Looking for your next opportunity?
+                        </h2>
+
+                        <p>
+                            Explore the latest jobs and
+                            find the perfect opportunity
+                            for your career.
+                        </p>
+
+                    </div>
+
+                    <Link
+                        to="/jobs"
+                        className="candidate-primary-button"
+                    >
+                        Explore Jobs →
+                    </Link>
+
+                </section>
+
 
             </main>
 

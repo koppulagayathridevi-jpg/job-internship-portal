@@ -1,64 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import JobCard from "../components/JobCard";
 import "../styles/jobs.css";
 
 function Jobs() {
 
-    const jobs = [
-        {
-            id: 1,
-            title: "Frontend Developer Intern",
-            company: "ABC Technologies",
-            location: "Hyderabad",
-            type: "Internship",
-            skills: "HTML, CSS, JavaScript, React"
-        },
-        {
-            id: 2,
-            title: "Python Developer",
-            company: "Tech Solutions",
-            location: "Bangalore",
-            type: "Full Time",
-            skills: "Python, Django, REST API"
-        },
-        {
-            id: 3,
-            title: "Backend Developer Intern",
-            company: "Startup Labs",
-            location: "Remote",
-            type: "Internship",
-            skills: "Node.js, Express, MongoDB"
-        },
-        {
-            id: 4,
-            title: "React Developer",
-            company: "ABC Technologies",
-            location: "Hyderabad",
-            type: "Full Time",
-            skills: "React, JavaScript, CSS"
-        },
-        {
-            id: 5,
-            title: "Python Intern",
-            company: "Startup Labs",
-            location: "Chennai",
-            type: "Internship",
-            skills: "Python, Flask, SQL"
-        },
-        {
-            id: 6,
-            title: "Java Developer",
-            company: "Tech Solutions",
-            location: "Bangalore",
-            type: "Full Time",
-            skills: "Java, Spring Boot, MySQL"
-        }
-    ];
+    // =====================================================
+    // JOB DATA
+    // =====================================================
+
+    const [jobs, setJobs] = useState([]);
+
+    const [loading, setLoading] = useState(true);
+
+    const [error, setError] = useState("");
 
 
-    /* =====================================================
-       FILTER STATES
-    ===================================================== */
+    // =====================================================
+    // FILTER STATES
+    // =====================================================
 
     const [search, setSearch] = useState("");
     const [location, setLocation] = useState("");
@@ -66,27 +25,92 @@ function Jobs() {
     const [company, setCompany] = useState("");
 
 
-    /* =====================================================
-       FILTER JOBS
-    ===================================================== */
+    // =====================================================
+    // FETCH JOBS FROM BACKEND
+    // =====================================================
+
+    useEffect(() => {
+
+        const fetchJobs = async () => {
+
+            try {
+
+                const response = await fetch(
+                    "http://localhost:5000/api/jobs"
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.message || "Failed to fetch jobs"
+                    );
+
+                }
+
+                setJobs(data.jobs);
+
+            } catch (error) {
+
+                console.error(
+                    "Fetch Jobs Error:",
+                    error
+                );
+
+                setError(
+                    "Unable to load jobs. Please try again."
+                );
+
+            } finally {
+
+                setLoading(false);
+
+            }
+
+        };
+
+        fetchJobs();
+
+    }, []);
+
+
+    // =====================================================
+    // FILTER JOBS
+    // =====================================================
 
     const filteredJobs = jobs.filter((job) => {
 
-        const searchValue = search.toLowerCase().trim();
+        const searchValue =
+            search.toLowerCase().trim();
+
 
         const matchesSearch =
             searchValue === "" ||
-            job.title.toLowerCase().includes(searchValue) ||
-            job.skills.toLowerCase().includes(searchValue) ||
-            job.company.toLowerCase().includes(searchValue);
+
+            job.title
+                .toLowerCase()
+                .includes(searchValue) ||
+
+            job.skills
+                .join(" ")
+                .toLowerCase()
+                .includes(searchValue) ||
+
+            job.company
+                .toLowerCase()
+                .includes(searchValue);
+
 
         const matchesLocation =
             location === "" ||
             job.location === location;
 
+
         const matchesType =
             type === "" ||
             job.type === type;
+
 
         const matchesCompany =
             company === "" ||
@@ -99,20 +123,109 @@ function Jobs() {
             matchesType &&
             matchesCompany
         );
+
     });
 
 
-    /* =====================================================
-       CLEAR FILTERS
-    ===================================================== */
+    // =====================================================
+    // CLEAR FILTERS
+    // =====================================================
 
     const clearFilters = () => {
+
         setSearch("");
         setLocation("");
         setType("");
         setCompany("");
+
     };
 
+
+    // =====================================================
+    // LOADING
+    // =====================================================
+
+    if (loading) {
+
+        return (
+
+            <div className="jobs-page">
+
+                <div className="container">
+
+                    <div className="jobs-loading">
+
+                        <div
+                            className="spinner-border text-primary"
+                            role="status"
+                        >
+                        </div>
+
+                        <p>
+                            Loading jobs...
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        );
+
+    }
+
+
+    // =====================================================
+    // ERROR
+    // =====================================================
+
+    if (error) {
+
+        return (
+
+            <div className="jobs-page">
+
+                <div className="container">
+
+                    <div className="jobs-no-results">
+
+                        <div className="jobs-no-results-icon">
+                            ⚠️
+                        </div>
+
+                        <h5>
+                            Unable to Load Jobs
+                        </h5>
+
+                        <p>
+                            {error}
+                        </p>
+
+                        <button
+                            type="button"
+                            className="jobs-clear-button"
+                            onClick={() =>
+                                window.location.reload()
+                            }
+                        >
+                            Try Again
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        );
+
+    }
+
+
+    // =====================================================
+    // PAGE
+    // =====================================================
 
     return (
 
@@ -234,6 +347,10 @@ function Jobs() {
                                     Full Time
                                 </option>
 
+                                <option value="Part Time">
+                                    Part Time
+                                </option>
+
                                 <option value="Internship">
                                     Internship
                                 </option>
@@ -316,10 +433,12 @@ function Jobs() {
                     <span className="jobs-results-count">
 
                         {filteredJobs.length}{" "}
+
                         {filteredJobs.length === 1
                             ? "job"
                             : "jobs"
                         }{" "}
+
                         found
 
                     </span>
@@ -337,7 +456,9 @@ function Jobs() {
 
                         {filteredJobs.map((job) => (
 
-                            <div key={job.id}>
+                            <div
+                                key={job._id}
+                            >
 
                                 <JobCard job={job} />
 
@@ -383,6 +504,7 @@ function Jobs() {
             </div>
 
         </div>
+
     );
 }
 
