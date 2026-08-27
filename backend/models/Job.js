@@ -23,7 +23,7 @@ const jobSchema = new mongoose.Schema(
         type: {
             type: String,
             required: true,
-            enum: ["Full Time", "Part Time", "Internship"]
+            enum: ["Full-Time", "Part-Time", "Internship"]
         },
 
         salary: {

@@ -206,22 +206,58 @@ function AdminDashboard() {
   // =====================================================
   // UPDATE APPLICATION STATUS
   // =====================================================
+const updateStatus = async (id, status) => {
+    try {
+        const token = localStorage.getItem("token");
 
-  const updateStatus = (id, status) => {
+        if (!token) {
+            alert("Admin login token not found.");
+            return;
+        }
 
-    setApplications(
-      applications.map((application) =>
-        application._id === id
-          ? {
-              ...application,
-              status: status,
+        const response = await fetch(
+            `http://localhost:5000/api/applications/${id}/status`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    status: status,
+                }),
             }
-          : application
-      )
-    );
+        );
 
-  };
+        const data = await response.json();
 
+        console.log("Status Update Response:", data);
+
+        if (!response.ok) {
+            throw new Error(
+                data.message || "Failed to update application status"
+            );
+        }
+
+        // Update dashboard after backend succeeds
+        setApplications((prevApplications) =>
+            prevApplications.map((application) =>
+                application._id === id
+                    ? {
+                        ...application,
+                        status: status,
+                    }
+                    : application
+            )
+        );
+
+        alert(`Application status changed to ${status}`);
+
+    } catch (error) {
+        console.error("Status Update Error:", error);
+        alert(error.message);
+    }
+};
 
   // =====================================================
   // DELETE APPLICATION
@@ -853,25 +889,10 @@ function AdminDashboard() {
                                 }
                               >
 
-                                <option value="Applied">
-                                  Applied
-                                </option>
-
-                                <option value="Under Review">
-                                  Under Review
-                                </option>
-
-                                <option value="Shortlisted">
-                                  Shortlisted
-                                </option>
-
-                                <option value="Selected">
-                                  Selected
-                                </option>
-
-                                <option value="Rejected">
-                                  Rejected
-                                </option>
+                                <option value="Pending">Pending</option>
+<option value="Shortlisted">Shortlisted</option>
+<option value="Rejected">Rejected</option>
+<option value="Accepted">Accepted</option>
 
                               </select>
 
