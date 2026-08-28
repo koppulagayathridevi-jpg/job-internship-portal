@@ -20,8 +20,11 @@ function Jobs() {
     // =====================================================
 
     const [search, setSearch] = useState("");
+
     const [location, setLocation] = useState("");
+
     const [type, setType] = useState("");
+
     const [company, setCompany] = useState("");
 
 
@@ -35,21 +38,38 @@ function Jobs() {
 
             try {
 
+                setLoading(true);
+
+                setError("");
+
                 const response = await fetch(
                     "http://localhost:5000/api/jobs"
                 );
 
                 const data = await response.json();
 
+                console.log(
+                    "Jobs API Response:",
+                    data
+                );
+
+
                 if (!response.ok) {
 
                     throw new Error(
-                        data.message || "Failed to fetch jobs"
+                        data.message ||
+                        "Failed to fetch jobs"
                     );
 
                 }
 
-                setJobs(data.jobs);
+
+                setJobs(
+                    Array.isArray(data.jobs)
+                        ? data.jobs
+                        : []
+                );
+
 
             } catch (error) {
 
@@ -62,6 +82,7 @@ function Jobs() {
                     "Unable to load jobs. Please try again."
                 );
 
+
             } finally {
 
                 setLoading(false);
@@ -70,9 +91,44 @@ function Jobs() {
 
         };
 
+
         fetchJobs();
 
     }, []);
+
+
+    // =====================================================
+    // GET UNIQUE COMPANIES FROM MONGODB JOBS
+    // =====================================================
+
+    const companies = [
+        ...new Set(
+            jobs
+                .map((job) => job.company)
+                .filter(
+                    (companyName) =>
+                        companyName &&
+                        companyName.trim() !== ""
+                )
+        )
+    ].sort();
+
+
+    // =====================================================
+    // GET UNIQUE LOCATIONS FROM MONGODB JOBS
+    // =====================================================
+
+    const locations = [
+        ...new Set(
+            jobs
+                .map((job) => job.location)
+                .filter(
+                    (locationName) =>
+                        locationName &&
+                        locationName.trim() !== ""
+                )
+        )
+    ].sort();
 
 
     // =====================================================
@@ -82,35 +138,65 @@ function Jobs() {
     const filteredJobs = jobs.filter((job) => {
 
         const searchValue =
-            search.toLowerCase().trim();
+            search
+                .toLowerCase()
+                .trim();
 
+
+        // -------------------------------------------------
+        // SAFE SKILLS
+        // -------------------------------------------------
+
+        const jobSkills = Array.isArray(job.skills)
+            ? job.skills.join(" ")
+            : String(job.skills || "");
+
+
+        // -------------------------------------------------
+        // SEARCH
+        // -------------------------------------------------
 
         const matchesSearch =
             searchValue === "" ||
 
-            job.title
+            String(job.title || "")
                 .toLowerCase()
                 .includes(searchValue) ||
 
-            job.skills
-                .join(" ")
+            String(job.company || "")
                 .toLowerCase()
                 .includes(searchValue) ||
 
-            job.company
+            String(job.location || "")
+                .toLowerCase()
+                .includes(searchValue) ||
+
+            jobSkills
                 .toLowerCase()
                 .includes(searchValue);
 
+
+        // -------------------------------------------------
+        // LOCATION
+        // -------------------------------------------------
 
         const matchesLocation =
             location === "" ||
             job.location === location;
 
 
+        // -------------------------------------------------
+        // JOB TYPE
+        // -------------------------------------------------
+
         const matchesType =
             type === "" ||
             job.type === type;
 
+
+        // -------------------------------------------------
+        // COMPANY
+        // -------------------------------------------------
 
         const matchesCompany =
             company === "" ||
@@ -134,8 +220,11 @@ function Jobs() {
     const clearFilters = () => {
 
         setSearch("");
+
         setLocation("");
+
         setType("");
+
         setCompany("");
 
     };
@@ -245,8 +334,8 @@ function Jobs() {
                     </h1>
 
                     <p>
-                        Find the right job or internship opportunity
-                        for your career.
+                        Find the right job or internship
+                        opportunity for your career.
                     </p>
 
                 </div>
@@ -261,7 +350,9 @@ function Jobs() {
                     <div className="row g-3">
 
 
-                        {/* SEARCH */}
+                        {/* =================================================
+                            SEARCH
+                        ================================================= */}
 
                         <div className="col-md-3">
 
@@ -272,17 +363,21 @@ function Jobs() {
                             <input
                                 type="text"
                                 className="jobs-filter-input"
-                                placeholder="Search jobs..."
+                                placeholder="Search jobs, skills..."
                                 value={search}
                                 onChange={(e) =>
-                                    setSearch(e.target.value)
+                                    setSearch(
+                                        e.target.value
+                                    )
                                 }
                             />
 
                         </div>
 
 
-                        {/* LOCATION */}
+                        {/* =================================================
+                            LOCATION
+                        ================================================= */}
 
                         <div className="col-md-3">
 
@@ -294,7 +389,9 @@ function Jobs() {
                                 className="jobs-filter-select"
                                 value={location}
                                 onChange={(e) =>
-                                    setLocation(e.target.value)
+                                    setLocation(
+                                        e.target.value
+                                    )
                                 }
                             >
 
@@ -302,28 +399,28 @@ function Jobs() {
                                     All Locations
                                 </option>
 
-                                <option value="Hyderabad">
-                                    Hyderabad
-                                </option>
 
-                                <option value="Bangalore">
-                                    Bangalore
-                                </option>
+                                {locations.map(
+                                    (locationName) => (
 
-                                <option value="Chennai">
-                                    Chennai
-                                </option>
+                                        <option
+                                            key={locationName}
+                                            value={locationName}
+                                        >
+                                            {locationName}
+                                        </option>
 
-                                <option value="Remote">
-                                    Remote
-                                </option>
+                                    )
+                                )}
 
                             </select>
 
                         </div>
 
 
-                        {/* JOB TYPE */}
+                        {/* =================================================
+                            JOB TYPE
+                        ================================================= */}
 
                         <div className="col-md-3">
 
@@ -335,7 +432,9 @@ function Jobs() {
                                 className="jobs-filter-select"
                                 value={type}
                                 onChange={(e) =>
-                                    setType(e.target.value)
+                                    setType(
+                                        e.target.value
+                                    )
                                 }
                             >
 
@@ -343,11 +442,11 @@ function Jobs() {
                                     All Types
                                 </option>
 
-                                <option value="Full Time">
+                                <option value="Full-Time">
                                     Full Time
                                 </option>
 
-                                <option value="Part Time">
+                                <option value="Part-Time">
                                     Part Time
                                 </option>
 
@@ -355,12 +454,18 @@ function Jobs() {
                                     Internship
                                 </option>
 
+                                <option value="Contract">
+                                    Contract
+                                </option>
+
                             </select>
 
                         </div>
 
 
-                        {/* COMPANY */}
+                        {/* =================================================
+                            COMPANY
+                        ================================================= */}
 
                         <div className="col-md-3">
 
@@ -372,7 +477,9 @@ function Jobs() {
                                 className="jobs-filter-select"
                                 value={company}
                                 onChange={(e) =>
-                                    setCompany(e.target.value)
+                                    setCompany(
+                                        e.target.value
+                                    )
                                 }
                             >
 
@@ -380,17 +487,19 @@ function Jobs() {
                                     All Companies
                                 </option>
 
-                                <option value="ABC Technologies">
-                                    ABC Technologies
-                                </option>
 
-                                <option value="Tech Solutions">
-                                    Tech Solutions
-                                </option>
+                                {companies.map(
+                                    (companyName) => (
 
-                                <option value="Startup Labs">
-                                    Startup Labs
-                                </option>
+                                        <option
+                                            key={companyName}
+                                            value={companyName}
+                                        >
+                                            {companyName}
+                                        </option>
+
+                                    )
+                                )}
 
                             </select>
 
@@ -399,16 +508,23 @@ function Jobs() {
                     </div>
 
 
-                    {/* CLEAR FILTERS */}
+                    {/* =================================================
+                        ACTIVE FILTERS
+                    ================================================= */}
 
-                    {(search || location || type || company) && (
+                    {(search ||
+                        location ||
+                        type ||
+                        company) && (
 
                         <div className="jobs-clear-wrapper">
 
                             <button
                                 type="button"
                                 className="jobs-clear-button"
-                                onClick={clearFilters}
+                                onClick={
+                                    clearFilters
+                                }
                             >
                                 Clear Filters
                             </button>
@@ -454,17 +570,21 @@ function Jobs() {
 
                     <div className="jobs-grid">
 
-                        {filteredJobs.map((job) => (
+                        {filteredJobs.map(
+                            (job) => (
 
-                            <div
-                                key={job._id}
-                            >
+                                <div
+                                    key={job._id}
+                                >
 
-                                <JobCard job={job} />
+                                    <JobCard
+                                        job={job}
+                                    />
 
-                            </div>
+                                </div>
 
-                        ))}
+                            )
+                        )}
 
                     </div>
 
@@ -485,14 +605,16 @@ function Jobs() {
                         </h5>
 
                         <p>
-                            No jobs found matching your current
-                            filters.
+                            No jobs found matching
+                            your current filters.
                         </p>
 
                         <button
                             type="button"
                             className="jobs-clear-button"
-                            onClick={clearFilters}
+                            onClick={
+                                clearFilters
+                            }
                         >
                             Clear Filters
                         </button>
@@ -506,6 +628,7 @@ function Jobs() {
         </div>
 
     );
+
 }
 
 export default Jobs;
