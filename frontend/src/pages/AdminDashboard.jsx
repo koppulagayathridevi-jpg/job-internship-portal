@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const API_URL = "https://job-internship-portal-055b.onrender.com";
+const API_URL = "https://job-internship-portal-o55b.onrender.com";
 
 function AdminDashboard() {
   const navigate = useNavigate();
