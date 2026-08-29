@@ -1,31 +1,21 @@
+
 /* =====================================================
    FOOTER
    Job & Internship Management Portal
 ===================================================== */
 
-
-/* =====================================================
-   MAIN FOOTER
-===================================================== */
-
 .job-footer {
-
     width: 100%;
-
-    background:
-        linear-gradient(
-            135deg,
-            #071d49 0%,
-            #0b2a63 50%,
-            #0f3b82 100%
-        );
+    background: linear-gradient(
+        135deg,
+        #071d49 0%,
+        #0b2a63 50%,
+        #0f3b82 100%
+    );
 
     color: #ffffff;
-
     margin-top: 60px;
-
     position: relative;
-
     overflow: hidden;
 }
 
@@ -35,325 +25,38 @@
 ===================================================== */
 
 .job-footer::before {
-
     content: "";
 
     position: absolute;
 
     width: 300px;
-
     height: 300px;
 
     border-radius: 50%;
 
     background: #2563eb;
-
     opacity: 0.08;
 
     top: -150px;
-
     right: 8%;
 }
 
 
 .job-footer::after {
-
     content: "";
 
     position: absolute;
 
     width: 220px;
-
     height: 220px;
 
     border-radius: 50%;
 
     background: #60a5fa;
-
     opacity: 0.06;
 
     bottom: -120px;
-
     left: 5%;
-}
-
-
-/* =====================================================
-   FOOTER CONTAINER
-===================================================== */
-
-.job-footer-container {
-
-    width: 100%;
-
-    max-width: 1320px;
-
-    margin: 0 auto;
-
-    padding: 55px 30px 45px;
-
-    display: grid;
-
-    grid-template-columns:
-        1.6fr
-        1fr
-        1.1fr
-        1.1fr
-        0.9fr;
-
-    gap: 45px;
-
-    position: relative;
-
-    z-index: 2;
-
-    box-sizing: border-box;
-}
-
-
-/* =====================================================
-   BRAND
-===================================================== */
-
-.job-footer-brand {
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: flex-start;
-}
-
-
-/* =====================================================
-   LOGO
-===================================================== */
-
-.job-footer-logo {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 11px;
-
-    color: #ffffff;
-
-    font-size: 21px;
-
-    font-weight: 800;
-
-    text-decoration: none;
-
-    letter-spacing: -0.3px;
-}
-
-
-.job-footer-logo:hover {
-
-    color: #ffffff;
-
-    text-decoration: none;
-}
-
-
-/* =====================================================
-   LOGO ICON
-===================================================== */
-
-.job-footer-logo-icon {
-
-    width: 42px;
-
-    height: 42px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    border-radius: 12px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #2563eb,
-            #3b82f6
-        );
-
-    color: #ffffff;
-
-    font-size: 19px;
-
-    box-shadow:
-        0 8px 20px rgba(37, 99, 235, 0.28);
-}
-
-
-/* =====================================================
-   BRAND DESCRIPTION
-===================================================== */
-
-.job-footer-brand p {
-
-    max-width: 300px;
-
-    margin: 16px 0 0;
-
-    color: #cbd5e1;
-
-    font-size: 13px;
-
-    line-height: 1.8;
-}
-
-
-/* =====================================================
-   FOOTER COLUMNS
-===================================================== */
-
-.job-footer-column {
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: flex-start;
-
-    gap: 11px;
-}
-
-
-/* =====================================================
-   COLUMN HEADING
-===================================================== */
-
-.job-footer-column h4 {
-
-    margin: 0 0 7px;
-
-    color: #ffffff;
-
-    font-size: 15px;
-
-    font-weight: 750;
-
-    position: relative;
-
-    padding-bottom: 7px;
-}
-
-
-.job-footer-column h4::after {
-
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-
-    bottom: 0;
-
-    width: 25px;
-
-    height: 2px;
-
-    border-radius: 5px;
-
-    background: #3b82f6;
-}
-
-
-/* =====================================================
-   FOOTER LINKS
-===================================================== */
-
-.job-footer-column a {
-
-    color: #cbd5e1;
-
-    font-size: 13px;
-
-    line-height: 1.6;
-
-    text-decoration: none;
-
-    transition:
-        color 0.2s ease,
-        transform 0.2s ease;
-}
-
-
-.job-footer-column a:hover {
-
-    color: #ffffff;
-
-    transform: translateX(4px);
-
-    text-decoration: none;
-}
-
-
-/* =====================================================
-   SOCIAL LINKS
-===================================================== */
-
-.job-social-links {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    margin-top: 4px;
-}
-
-
-.job-social-links a {
-
-    width: 36px;
-
-    height: 36px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    color: #ffffff;
-
-    font-size: 15px;
-
-    font-weight: 700;
-
-    border-radius: 9px;
-
-    background: rgba(255, 255, 255, 0.07);
-
-    border: 1px solid rgba(255, 255, 255, 0.10);
-
-    transition:
-        background-color 0.2s ease,
-        transform 0.2s ease,
-        border-color 0.2s ease;
-}
-
-
-.job-social-links a:hover {
-
-    background: #2563eb;
-
-    border-color: #3b82f6;
-
-    color: #ffffff;
-
-    transform: translateY(-3px);
-
-    box-shadow:
-        0 6px 15px rgba(37, 99, 235, 0.25);
 }
 
 
@@ -362,32 +65,37 @@
 ===================================================== */
 
 .job-footer-bottom {
-
     width: 100%;
 
     border-top: 1px solid rgba(255, 255, 255, 0.12);
 
     text-align: center;
 
-    padding: 20px 20px;
+    padding: 22px 20px;
 
     position: relative;
-
     z-index: 2;
 
     box-sizing: border-box;
 }
 
 
-.job-footer-bottom p {
+/* =====================================================
+   COPYRIGHT TEXT
+===================================================== */
 
+.job-footer-bottom p {
     margin: 0;
 
-    color: #94a3b8;
+    color: #cbd5e1;
 
-    font-size: 12px;
+    font-size: 13px;
 
     line-height: 1.6;
+
+    font-weight: 400;
+
+    letter-spacing: 0.2px;
 }
 
 
@@ -397,48 +105,17 @@
 
 @media (max-width: 991px) {
 
-    .job-footer-container {
-
-        grid-template-columns:
-            1.5fr
-            1fr
-            1fr;
-
-        gap: 40px;
-
-        padding: 45px 25px 40px;
+    .job-footer {
+        margin-top: 50px;
     }
 
-
-    .job-footer-brand {
-
-        grid-column: 1 / -1;
+    .job-footer-bottom {
+        padding: 20px 18px;
     }
 
-
-    .job-footer-brand p {
-
-        max-width: 500px;
+    .job-footer-bottom p {
+        font-size: 12px;
     }
-
-
-    .job-footer-logo {
-
-        font-size: 20px;
-    }
-
-
-    .job-footer-column h4 {
-
-        font-size: 14px;
-    }
-
-
-    .job-footer-column a {
-
-        font-size: 13px;
-    }
-
 }
 
 
@@ -449,92 +126,17 @@
 @media (max-width: 767px) {
 
     .job-footer {
-
-        margin-top: 45px;
+        margin-top: 40px;
     }
-
-
-    .job-footer-container {
-
-        grid-template-columns: 1fr 1fr;
-
-        padding: 40px 20px 35px;
-
-        gap: 35px 25px;
-    }
-
-
-    .job-footer-brand {
-
-        grid-column: 1 / -1;
-    }
-
-
-    .job-footer-logo {
-
-        font-size: 19px;
-    }
-
-
-    .job-footer-logo-icon {
-
-        width: 40px;
-
-        height: 40px;
-
-        font-size: 18px;
-    }
-
-
-    .job-footer-brand p {
-
-        max-width: 100%;
-
-        font-size: 13px;
-
-        line-height: 1.7;
-    }
-
-
-    .job-footer-column h4 {
-
-        font-size: 14px;
-    }
-
-
-    .job-footer-column a {
-
-        font-size: 12px;
-    }
-
-
-    .job-social-links {
-
-        gap: 9px;
-    }
-
-
-    .job-social-links a {
-
-        width: 34px;
-
-        height: 34px;
-
-        font-size: 14px;
-    }
-
 
     .job-footer-bottom {
-
         padding: 18px 15px;
     }
 
-
     .job-footer-bottom p {
-
         font-size: 11px;
+        line-height: 1.7;
     }
-
 }
 
 
@@ -544,59 +146,17 @@
 
 @media (max-width: 480px) {
 
-    .job-footer-container {
-
-        grid-template-columns: 1fr;
-
-        gap: 28px;
-
-        padding: 35px 20px 30px;
+    .job-footer {
+        margin-top: 35px;
     }
 
-
-    .job-footer-brand {
-
-        grid-column: auto;
+    .job-footer-bottom {
+        padding: 17px 12px;
     }
-
-
-    .job-footer-brand p {
-
-        font-size: 12px;
-    }
-
-
-    .job-footer-column {
-
-        gap: 9px;
-    }
-
-
-    .job-footer-column h4 {
-
-        font-size: 14px;
-
-        margin-bottom: 5px;
-    }
-
-
-    .job-footer-column a {
-
-        font-size: 12px;
-    }
-
-
-    .job-social-links a {
-
-        width: 35px;
-
-        height: 35px;
-    }
-
 
     .job-footer-bottom p {
-
         font-size: 10px;
+        line-height: 1.6;
     }
-
 }
+
