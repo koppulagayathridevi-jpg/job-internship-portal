@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://job-internship-portal-055b.onrender.com";
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -186,7 +186,7 @@ const getResumeUrl = (application) => {
 
     const cleanResume = resume.replace(/^\/+/, "");
 
-    return `http://localhost:5000/uploads/${cleanResume}`;
+    return `https://job-internship-portal-055b.onrender.com/uploads/${cleanResume}`;
 };
 // =====================================================
 // VIEW RESUME

@@ -43,7 +43,7 @@ function Jobs() {
                 setError("");
 
                 const response = await fetch(
-                    "http://localhost:5000/api/jobs"
+                    "https://job-internship-portal-055b.onrender.com/api/jobs"
                 );
 
                 const data = await response.json();

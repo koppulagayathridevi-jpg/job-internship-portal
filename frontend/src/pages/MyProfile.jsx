@@ -50,7 +50,7 @@ const MyProfile = () => {
             console.log("Token exists:", !!token);
 
             const response = await fetch(
-                "http://localhost:5000/api/profile",
+                "https://job-internship-portal-055b.onrender.com/api/profile",
                 {
                     method: "GET",
                     headers: {
@@ -190,7 +190,7 @@ const MyProfile = () => {
             // ---------------------------------------------
 
             const response = await fetch(
-                "http://localhost:5000/api/profile",
+                "https://job-internship-portal-055b.onrender.com/api/profile",
                 {
                     method: "PUT",
 
