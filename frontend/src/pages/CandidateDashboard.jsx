@@ -43,7 +43,7 @@ function CandidateDashboard() {
                 // ---------------------------------------------
 
                 const response = await fetch(
-                    "https://job-internship-portal-055b.onrender.com/api/applications/my",
+                    "https://job-internship-portal-o55b.onrender.com/api/applications/my",
                     {
                         method: "GET",
 

@@ -29,7 +29,7 @@ function Register() {
     }
 
     try {
-      await axios.post("https://job-internship-portal-055b.onrender.com/api/auth/register", {
+      await axios.post("https://job-internship-portal-o55b.onrender.com/api/auth/register", {
         name: form.name,
         email: form.email,
         password: form.password,

@@ -186,7 +186,7 @@ const getResumeUrl = (application) => {
 
     const cleanResume = resume.replace(/^\/+/, "");
 
-    return `https://job-internship-portal-055b.onrender.com/uploads/${cleanResume}`;
+    return `https://job-internship-portal-o55b.onrender.com/uploads/${cleanResume}`;
 };
 // =====================================================
 // VIEW RESUME

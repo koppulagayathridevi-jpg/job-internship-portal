@@ -21,7 +21,7 @@
 //     const fetchJob = async () => {
 //       try {
 //         const response = await fetch(
-//           `https://job-internship-portal-055b.onrender.com/api/jobs/${id}`
+//           `https://job-internship-portal-o55b.onrender.com/api/jobs/${id}`
 //         );
 
 //         const data = await response.json();
@@ -66,7 +66,7 @@
 //       setApplying(true);
 
 //       const response = await fetch(
-//         "https://job-internship-portal-055b.onrender.com/api/applications",
+//         "https://job-internship-portal-o55b.onrender.com/api/applications",
 //         {
 //           method: "POST",
 
@@ -604,7 +604,7 @@ function JobDetails() {
         setError("");
 
         const response = await fetch(
-          `https://job-internship-portal-055b.onrender.com/api/jobs/${id}`
+          `https://job-internship-portal-o55b.onrender.com/api/jobs/${id}`
         );
 
         const data = await response.json();
@@ -718,7 +718,7 @@ function JobDetails() {
 
         const applicationResponse =
           await fetch(
-            "https://job-internship-portal-055b.onrender.com/api/applications",
+            "https://job-internship-portal-o55b.onrender.com/api/applications",
             {
               method: "POST",
 
@@ -787,7 +787,7 @@ function JobDetails() {
 
         const resumeResponse =
           await fetch(
-            `https://job-internship-portal-055b.onrender.com/api/applications/${applicationId}/resume`,
+            `https://job-internship-portal-o55b.onrender.com/api/applications/${applicationId}/resume`,
             {
               method: "PATCH",
 

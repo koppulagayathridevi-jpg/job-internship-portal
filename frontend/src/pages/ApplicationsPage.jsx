@@ -34,7 +34,7 @@ function ApplicationsPage() {
 
 
                 const response = await fetch(
-                    "https://job-internship-portal-055b.onrender.com/api/applications/my",
+                    "https://job-internship-portal-o55b.onrender.com/api/applications/my",
                     {
                         method: "GET",
 
@@ -150,7 +150,7 @@ function ApplicationsPage() {
 
 
         const resumeUrl =
-            `https://job-internship-portal-055b.onrender.com/uploads/resumes/${resume}`;
+            `https://job-internship-portal-o55b.onrender.com/uploads/resumes/${resume}`;
 
 
         window.open(
@@ -182,7 +182,7 @@ function ApplicationsPage() {
 
 
         const resumeUrl =
-            `https://job-internship-portal-055b.onrender.com/uploads/resumes/${resume}`;
+            `https://job-internship-portal-o55b.onrender.com/uploads/resumes/${resume}`;
 
 
         const link =
