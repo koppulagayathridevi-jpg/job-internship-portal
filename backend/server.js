@@ -1,115 +1,3 @@
-
-
-// require("dotenv").config();
-
-// const express = require("express");
-// const mongoose = require("mongoose");
-// const cors = require("cors");
-// const path = require("path");
-
-// const authRoutes = require("./routes/authRoutes");
-// const userRoutes = require("./routes/userRoutes");
-// const adminRoutes = require("./routes/adminRoutes");
-// const jobRoutes = require("./routes/jobRoutes");
-// const applicationRoutes = require("./routes/applicationRoutes");
-// const companyRoutes = require("./routes/companyRoutes");
-
-// const app = express();
-
-
-// // =====================================================
-// // CORS
-// // =====================================================
-
-// app.use(
-//     cors({
-//         origin: [
-//             "http://localhost:5173",
-//             "https://job-internship-portal-red.vercel.app"
-//         ],
-//         credentials: true
-//     })
-// );
-
-// // =====================================================
-// // BODY PARSER
-// // =====================================================
-
-// app.use(express.json());
-
-
-// // =====================================================
-// // UPLOADS
-// // =====================================================
-
-// app.use(
-//     "/uploads",
-//     express.static(
-//         path.join(__dirname, "uploads")
-//     )
-// );
-
-
-// // =====================================================
-// // API ROUTES
-// // =====================================================
-
-// app.use("/api/auth", authRoutes);
-
-// app.use("/api", userRoutes);
-
-// app.use("/api/admin", adminRoutes);
-
-// app.use("/api/jobs", jobRoutes);
-
-// app.use("/api/applications", applicationRoutes);
-
-// app.use("/api/companies", companyRoutes);
-
-
-// // =====================================================
-// // MONGODB
-// // =====================================================
-
-// mongoose
-//     .connect(process.env.MONGO_URI)
-//     .then(() => {
-//         console.log(
-//             "MongoDB Connected Successfully"
-//         );
-//     })
-//     .catch((error) => {
-//         console.error(
-//             "MongoDB Connection Error:",
-//             error.message
-//         );
-//     });
-
-
-// // =====================================================
-// // TEST ROUTE
-// // =====================================================
-
-// app.get("/", (req, res) => {
-//     res.send(
-//         "Job Portal Backend Running"
-//     );
-// });
-
-
-// // =====================================================
-// // SERVER
-// // =====================================================
-
-// const PORT = process.env.PORT || 5000;
-
-// app.listen(PORT, () => {
-//     console.log(
-//         `Server running on port ${PORT}`
-//     );
-// });
-
-
 require("dotenv").config();
 
 const express = require("express");
@@ -138,33 +26,10 @@ const app = express();
 // CORS
 // =====================================================
 
-const allowedOrigins = [
-    "http://localhost:5173",
-    "https://job-internship-portal-red.vercel.app"
-];
-
 app.use(
     cors({
-        origin: function (origin, callback) {
-
-            // Allow Postman and requests without an origin
-            if (!origin) {
-                return callback(null, true);
-            }
-
-            if (allowedOrigins.includes(origin)) {
-                return callback(null, true);
-            }
-
-            console.log("Blocked CORS origin:", origin);
-
-            return callback(
-                new Error("Not allowed by CORS")
-            );
-        },
-
+        origin: true,
         credentials: true,
-
         methods: [
             "GET",
             "POST",
@@ -173,7 +38,6 @@ app.use(
             "DELETE",
             "OPTIONS"
         ],
-
         allowedHeaders: [
             "Content-Type",
             "Authorization"
@@ -282,25 +146,21 @@ app.use((err, req, res, next) => {
 });
 
 // =====================================================
-// MONGODB CONNECTION
+// MONGODB
 // =====================================================
 
 mongoose
     .connect(process.env.MONGO_URI)
     .then(() => {
-
         console.log(
             "MongoDB Connected Successfully"
         );
-
     })
     .catch((error) => {
-
         console.error(
             "MongoDB Connection Error:",
             error.message
         );
-
     });
 
 // =====================================================
@@ -310,9 +170,7 @@ mongoose
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-
     console.log(
         `Server running on port ${PORT}`
     );
-
 });
