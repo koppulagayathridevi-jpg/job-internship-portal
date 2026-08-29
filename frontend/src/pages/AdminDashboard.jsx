@@ -12,6 +12,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+const API_URL = "http://localhost:5000";
+
 function AdminDashboard() {
   const navigate = useNavigate();
 
@@ -26,16 +28,8 @@ function AdminDashboard() {
   // =====================================================
 
   const [companies, setCompanies] = useState([]);
-
-  const [companiesLoading, setCompaniesLoading] =
-    useState(false);
-
-  const [companiesError, setCompaniesError] =
-    useState("");
-
-  // =====================================================
-  // COMPANY FORM
-  // =====================================================
+  const [companiesLoading, setCompaniesLoading] = useState(false);
+  const [companiesError, setCompaniesError] = useState("");
 
   const [company, setCompany] = useState({
     name: "",
@@ -50,20 +44,13 @@ function AdminDashboard() {
   // =====================================================
 
   const [jobs, setJobs] = useState([]);
+  const [jobsLoading, setJobsLoading] = useState(false);
+  const [jobsError, setJobsError] = useState("");
 
-  const [jobsLoading, setJobsLoading] =
-    useState(false);
+  const [editingJobId, setEditingJobId] = useState(null);
+  const [jobLoading, setJobLoading] = useState(false);
 
-  const [jobsError, setJobsError] =
-    useState("");
-
-  const [editingJobId, setEditingJobId] =
-    useState(null);
-
-  const [jobLoading, setJobLoading] =
-    useState(false);
-
-  const [job, setJob] = useState({
+  const emptyJob = {
     title: "",
     company: "",
     location: "",
@@ -76,56 +63,58 @@ function AdminDashboard() {
     eligibility: "",
     requirements: "",
     deadline: "",
-  });
+  };
+
+  const [job, setJob] = useState(emptyJob);
 
   // =====================================================
   // APPLICATIONS
   // =====================================================
 
-  const [applications, setApplications] =
-    useState([]);
-
-  const [
-    applicationsLoading,
-    setApplicationsLoading,
-  ] = useState(false);
-
-  const [
-    applicationsError,
-    setApplicationsError,
-  ] = useState("");
+  const [applications, setApplications] = useState([]);
+  const [applicationsLoading, setApplicationsLoading] = useState(false);
+  const [applicationsError, setApplicationsError] = useState("");
 
   // =====================================================
   // USERS
   // =====================================================
 
-  const [users, setUsers] =
-    useState([]);
-
-  const [
-    usersLoading,
-    setUsersLoading,
-  ] = useState(false);
-
-  const [
-    usersError,
-    setUsersError,
-  ] = useState("");
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [usersError, setUsersError] = useState("");
   const [userSearch, setUserSearch] = useState("");
-  const filteredUsers = users.filter((user) => {
-    const search = userSearch.toLowerCase().trim();
-
-    return (
-        (user.name || "").toLowerCase().includes(search) ||
-        (user.email || "").toLowerCase().includes(search) ||
-        (user.role || "").toLowerCase().includes(search)
-    );
-});
 
   // =====================================================
-  // APPLICATION CHART DATA
-  // IMPORTANT:
-  // applications is declared BEFORE this calculation
+  // FILTER USERS
+  // =====================================================
+
+  const filteredUsers = useMemo(() => {
+    const search = userSearch.toLowerCase().trim();
+
+    if (!search) {
+      return users;
+    }
+
+    return users.filter((user) => {
+      return (
+        (user.name || "")
+          .toLowerCase()
+          .includes(search) ||
+        (user.username || "")
+          .toLowerCase()
+          .includes(search) ||
+        (user.email || "")
+          .toLowerCase()
+          .includes(search) ||
+        (user.role || "")
+          .toLowerCase()
+          .includes(search)
+      );
+    });
+  }, [users, userSearch]);
+
+  // =====================================================
+  // APPLICATION CHART
   // =====================================================
 
   const applicationChartData = useMemo(() => {
@@ -134,32 +123,215 @@ function AdminDashboard() {
     applications.forEach((application) => {
       const date = application.createdAt
         ? new Date(application.createdAt)
+        : application.appliedAt
+        ? new Date(application.appliedAt)
         : new Date();
 
-      const label = date.toLocaleDateString(
-        "en-IN",
-        {
-          day: "2-digit",
-          month: "short",
-        }
-      );
+      const label = date.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+      });
 
-      grouped[label] =
-        (grouped[label] || 0) + 1;
+      grouped[label] = (grouped[label] || 0) + 1;
     });
 
-    return Object.entries(grouped)
-      .map(([date, count]) => ({
-        date,
-        applications: count,
-      }))
-      .sort(
-        (a, b) =>
-          new Date(a.date) -
-          new Date(b.date)
-      );
+    return Object.entries(grouped).map(([date, count]) => ({
+      date,
+      applications: count,
+    }));
   }, [applications]);
 
+
+  // =====================================================
+// SELECTED CANDIDATES
+// =====================================================
+const selectedApplications = useMemo(() => {
+  return applications.filter((application) => {
+    const status = String(application.status || "")
+      .trim()
+      .toLowerCase();
+
+    return status === "accepted";
+  });
+}, [applications]);
+
+const selectedCandidates = selectedApplications.length;
+  // =====================================================
+  // AUTH TOKEN
+  // =====================================================
+
+  const getToken = () => {
+    return localStorage.getItem("token");
+  };
+
+// =====================================================
+// RESUME URL
+const getResumeUrl = (application) => {
+    if (!application) {
+        return null;
+    }
+
+    const resume = application.resume;
+
+    if (!resume) {
+        return null;
+    }
+
+    if (
+        resume.startsWith("http://") ||
+        resume.startsWith("https://")
+    ) {
+        return resume;
+    }
+
+    const cleanResume = resume.replace(/^\/+/, "");
+
+    return `http://localhost:5000/uploads/${cleanResume}`;
+};
+// =====================================================
+// VIEW RESUME
+// Opens PDF in browser without downloading
+const viewResume = async (application) => {
+
+    console.log("========== VIEW RESUME ==========");
+    console.log("Application:", application);
+    console.log("Resume:", application?.resume);
+
+    const resumeUrl = getResumeUrl(application);
+
+    console.log("Resume URL:", resumeUrl);
+
+    if (!resumeUrl) {
+        alert("Resume is not available.");
+        return;
+    }
+
+    try {
+
+        const response = await fetch(resumeUrl);
+
+        console.log(
+            "Resume response status:",
+            response.status
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Resume file not found. HTTP ${response.status}`
+            );
+        }
+
+        const blob = await response.blob();
+
+        console.log(
+            "Resume Blob:",
+            blob
+        );
+
+        // Create temporary URL for the PDF
+        const blobUrl =
+            window.URL.createObjectURL(blob);
+
+        // Open PDF in a new tab
+        const newTab = window.open(
+            "",
+            "_blank"
+        );
+
+        if (!newTab) {
+            alert(
+                "Please allow pop-ups in your browser to view the resume."
+            );
+
+            window.URL.revokeObjectURL(blobUrl);
+            return;
+        }
+
+        // Navigate new tab to PDF
+        newTab.location.href = blobUrl;
+
+        // Release URL after browser has loaded it
+        setTimeout(() => {
+            window.URL.revokeObjectURL(blobUrl);
+        }, 60000);
+
+    } catch (error) {
+
+        console.error(
+            "View Resume Error:",
+            error
+        );
+
+        alert(
+            error.message ||
+            "Failed to view resume."
+        );
+    }
+};
+   
+////download
+const downloadResume = async (application) => {
+
+    console.log("========== DOWNLOAD RESUME ==========");
+
+    const resumeUrl = getResumeUrl(application);
+
+    console.log("Resume URL:", resumeUrl);
+
+    if (!resumeUrl) {
+        alert("Resume is not available.");
+        return;
+    }
+
+    try {
+
+        const response = await fetch(resumeUrl);
+
+        console.log(
+            "Resume response status:",
+            response.status
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Resume file not found. HTTP ${response.status}`
+            );
+        }
+
+        const blob = await response.blob();
+
+        const blobUrl =
+            window.URL.createObjectURL(blob);
+
+        const link =
+            document.createElement("a");
+
+        link.href = blobUrl;
+
+        link.download =
+            application.resumeOriginalName ||
+            "resume.pdf";
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        document.body.removeChild(link);
+
+        window.URL.revokeObjectURL(blobUrl);
+
+    } catch (error) {
+
+        console.error(
+            "Download Resume Error:",
+            error
+        );
+
+        alert(
+            "Failed to download resume."
+        );
+    }
+};
   // =====================================================
   // FETCH JOBS
   // =====================================================
@@ -170,15 +342,12 @@ function AdminDashboard() {
       setJobsError("");
 
       const response = await fetch(
-        "http://localhost:5000/api/jobs"
+        `${API_URL}/api/jobs`
       );
 
       const data = await response.json();
 
-      console.log(
-        "Jobs API Response:",
-        data
-      );
+      console.log("Jobs API Response:", data);
 
       if (!response.ok) {
         throw new Error(
@@ -194,18 +363,23 @@ function AdminDashboard() {
 
       setJobs(jobsData);
     } catch (error) {
-      console.error(
-        "Jobs Fetch Error:",
-        error
-      );
+      console.error("Jobs Fetch Error:", error);
 
       setJobsError(
-        error.message ||
-          "Unable to load jobs"
+        error.message || "Unable to load jobs"
       );
     } finally {
       setJobsLoading(false);
     }
+  };
+
+  // =====================================================
+  // RESET JOB FORM
+  // =====================================================
+
+  const resetJobForm = () => {
+    setEditingJobId(null);
+    setJob(emptyJob);
   };
 
   // =====================================================
@@ -214,33 +388,28 @@ function AdminDashboard() {
 
   const addJob = async () => {
     try {
-      const token =
-        localStorage.getItem("token");
+      const token = getToken();
 
       if (!token) {
-        alert(
-          "Admin login token not found."
-        );
+        alert("Admin login token not found.");
         return;
       }
 
       if (
-        !job.title ||
-        !job.company ||
-        !job.location ||
+        !job.title.trim() ||
+        !job.company.trim() ||
+        !job.location.trim() ||
         !job.type ||
-        !job.description ||
-        !job.skills ||
-        !job.salary ||
-        !job.experience ||
-        !job.responsibilities ||
-        !job.eligibility ||
-        !job.requirements ||
+        !job.description.trim() ||
+        !job.skills.trim() ||
+        !job.salary.trim() ||
+        !job.experience.trim() ||
+        !job.responsibilities.trim() ||
+        !job.eligibility.trim() ||
+        !job.requirements.trim() ||
         !job.deadline
       ) {
-        alert(
-          "Please provide all job details."
-        );
+        alert("Please provide all job details.");
         return;
       }
 
@@ -254,55 +423,33 @@ function AdminDashboard() {
         skills: job.skills
           .split(",")
           .map((skill) => skill.trim())
-          .filter(
-            (skill) => skill !== ""
-          ),
+          .filter(Boolean),
 
         salary: job.salary.trim(),
-        experience:
-          job.experience.trim(),
-
-        responsibilities:
-          job.responsibilities.trim(),
-
-        eligibility:
-          job.eligibility.trim(),
-
-        requirements:
-          job.requirements.trim(),
-
+        experience: job.experience.trim(),
+        responsibilities: job.responsibilities.trim(),
+        eligibility: job.eligibility.trim(),
+        requirements: job.requirements.trim(),
         deadline: job.deadline,
       };
 
-      console.log(
-        "Sending Job Data:",
-        jobData
-      );
-
       const response = await fetch(
-        "http://localhost:5000/api/jobs",
+        `${API_URL}/api/jobs`,
         {
           method: "POST",
 
           headers: {
-            "Content-Type":
-              "application/json",
-
-            Authorization:
-              `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
 
           body: JSON.stringify(jobData),
         }
       );
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
-      console.log(
-        "Create Job Response:",
-        data
-      );
+      console.log("Create Job Response:", data);
 
       if (!response.ok) {
         throw new Error(
@@ -312,18 +459,14 @@ function AdminDashboard() {
         );
       }
 
-      alert(
-        "Job created successfully!"
-      );
+      alert("Job created successfully!");
 
       resetJobForm();
 
       await fetchJobs();
+      await fetchCompanies();
     } catch (error) {
-      console.error(
-        "Create Job Error:",
-        error
-      );
+      console.error("Create Job Error:", error);
 
       alert(
         error.message ||
@@ -333,77 +476,35 @@ function AdminDashboard() {
   };
 
   // =====================================================
-  // RESET JOB FORM
-  // =====================================================
-
-  const resetJobForm = () => {
-    setEditingJobId(null);
-
-    setJob({
-      title: "",
-      company: "",
-      location: "",
-      type: "",
-      description: "",
-      skills: "",
-      salary: "",
-      experience: "",
-      responsibilities: "",
-      eligibility: "",
-      requirements: "",
-      deadline: "",
-    });
-  };
-
-  // =====================================================
   // EDIT JOB
   // =====================================================
 
   const editJob = (selectedJob) => {
-    setEditingJobId(
-      selectedJob._id
-    );
+    setEditingJobId(selectedJob._id);
 
     setJob({
-      title:
-        selectedJob.title || "",
+      title: selectedJob.title || "",
+      company: selectedJob.company || "",
+      location: selectedJob.location || "",
+      type: selectedJob.type || "",
+      description: selectedJob.description || "",
 
-      company:
-        selectedJob.company || "",
-
-      location:
-        selectedJob.location || "",
-
-      type:
-        selectedJob.type || "",
-
-      description:
-        selectedJob.description || "",
-
-      skills: Array.isArray(
-        selectedJob.skills
-      )
+      skills: Array.isArray(selectedJob.skills)
         ? selectedJob.skills.join(", ")
         : selectedJob.skills || "",
 
-      salary:
-        selectedJob.salary || "",
-
-      experience:
-        selectedJob.experience || "",
-
+      salary: selectedJob.salary || "",
+      experience: selectedJob.experience || "",
       responsibilities:
         selectedJob.responsibilities || "",
-
       eligibility:
         selectedJob.eligibility || "",
-
       requirements:
         selectedJob.requirements || "",
-
-      deadline:
-        selectedJob.deadline || "",
+      deadline: selectedJob.deadline || "",
     });
+
+    setPage("jobs");
 
     window.scrollTo({
       top: 0,
@@ -417,40 +518,33 @@ function AdminDashboard() {
 
   const updateJob = async () => {
     try {
-      const token =
-        localStorage.getItem("token");
+      const token = getToken();
 
       if (!token) {
-        alert(
-          "Admin login token not found."
-        );
+        alert("Admin login token not found.");
         return;
       }
 
       if (!editingJobId) {
-        alert(
-          "No job selected for editing."
-        );
+        alert("No job selected for editing.");
         return;
       }
 
       if (
-        !job.title ||
-        !job.company ||
-        !job.location ||
+        !job.title.trim() ||
+        !job.company.trim() ||
+        !job.location.trim() ||
         !job.type ||
-        !job.description ||
-        !job.skills ||
-        !job.salary ||
-        !job.experience ||
-        !job.responsibilities ||
-        !job.eligibility ||
-        !job.requirements ||
+        !job.description.trim() ||
+        !job.skills.trim() ||
+        !job.salary.trim() ||
+        !job.experience.trim() ||
+        !job.responsibilities.trim() ||
+        !job.eligibility.trim() ||
+        !job.requirements.trim() ||
         !job.deadline
       ) {
-        alert(
-          "Please provide all job details."
-        );
+        alert("Please provide all job details.");
         return;
       }
 
@@ -461,64 +555,39 @@ function AdminDashboard() {
         company: job.company.trim(),
         location: job.location.trim(),
         type: job.type,
-        description:
-          job.description.trim(),
+        description: job.description.trim(),
 
         skills: job.skills
           .split(",")
           .map((skill) => skill.trim())
-          .filter(
-            (skill) => skill !== ""
-          ),
+          .filter(Boolean),
 
         salary: job.salary.trim(),
-
-        experience:
-          job.experience.trim(),
-
+        experience: job.experience.trim(),
         responsibilities:
           job.responsibilities.trim(),
-
-        eligibility:
-          job.eligibility.trim(),
-
-        requirements:
-          job.requirements.trim(),
-
+        eligibility: job.eligibility.trim(),
+        requirements: job.requirements.trim(),
         deadline: job.deadline,
       };
 
-      console.log(
-        "Updating Job:",
-        jobData
-      );
-
       const response = await fetch(
-        `http://localhost:5000/api/jobs/${editingJobId}`,
+        `${API_URL}/api/jobs/${editingJobId}`,
         {
           method: "PATCH",
 
           headers: {
-            "Content-Type":
-              "application/json",
-
-            Authorization:
-              `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
 
-          body: JSON.stringify(
-            jobData
-          ),
+          body: JSON.stringify(jobData),
         }
       );
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
-      console.log(
-        "Update Job Response:",
-        data
-      );
+      console.log("Update Job Response:", data);
 
       if (!response.ok) {
         throw new Error(
@@ -530,28 +599,22 @@ function AdminDashboard() {
 
       if (data.job) {
         setJobs((prevJobs) =>
-          prevJobs.map(
-            (existingJob) =>
-              existingJob._id ===
-              editingJobId
-                ? data.job
-                : existingJob
+          prevJobs.map((existingJob) =>
+            existingJob._id === editingJobId
+              ? data.job
+              : existingJob
           )
         );
       } else {
         await fetchJobs();
       }
 
-      alert(
-        "Job updated successfully!"
-      );
+      alert("Job updated successfully!");
 
       resetJobForm();
+      await fetchCompanies();
     } catch (error) {
-      console.error(
-        "Update Job Error:",
-        error
-      );
+      console.error("Update Job Error:", error);
 
       alert(
         error.message ||
@@ -565,142 +628,127 @@ function AdminDashboard() {
   // =====================================================
   // DELETE JOB
   // =====================================================
-const deleteJob = async (id) => {
-    try {
-        const token = localStorage.getItem("token");
 
-        if (!token) {
-            alert("Admin login token not found.");
-            return;
-        }
+  const deleteJob = async (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this job?"
+    );
 
-        const confirmed = window.confirm(
-            "Are you sure you want to delete this job?"
-        );
-
-        if (!confirmed) {
-            return;
-        }
-
-        const response = await fetch(
-            `http://localhost:5000/api/jobs/${id}`,
-            {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            }
-        );
-
-        const data = await response.json();
-
-        console.log("Delete Job Response:", data);
-
-        if (!response.ok) {
-            throw new Error(
-                data.message ||
-                data.error ||
-                "Failed to delete job"
-            );
-        }
-
-        // Remove from React state
-        setJobs((prevJobs) =>
-            prevJobs.filter(
-                (job) => job._id !== id
-            )
-        );
-
-        alert("Job deleted successfully!");
-
-    } catch (error) {
-        console.error(
-            "Delete Job Error:",
-            error
-        );
-
-        alert(error.message);
+    if (!confirmed) {
+      return;
     }
-};
+
+    try {
+      const token = getToken();
+
+      if (!token) {
+        alert("Admin login token not found.");
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/api/jobs/${id}`,
+        {
+          method: "DELETE",
+
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      console.log("Delete Job Response:", data);
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            data.error ||
+            "Failed to delete job"
+        );
+      }
+
+      setJobs((prevJobs) =>
+        prevJobs.filter(
+          (jobItem) => jobItem._id !== id
+        )
+      );
+
+      alert("Job deleted successfully!");
+
+      await fetchCompanies();
+    } catch (error) {
+      console.error("Delete Job Error:", error);
+
+      alert(
+        error.message ||
+          "Failed to delete job"
+      );
+    }
+  };
 
   // =====================================================
   // FETCH APPLICATIONS
   // =====================================================
 
-  const fetchApplications =
-    async () => {
-      try {
-        setApplicationsLoading(
-          true
-        );
+  const fetchApplications = async () => {
+    try {
+      setApplicationsLoading(true);
+      setApplicationsError("");
 
-        setApplicationsError("");
+      const token = getToken();
 
-        const token =
-          localStorage.getItem("token");
-
-        console.log(
-          "Admin token:",
-          token
-        );
-
-        if (!token) {
-          throw new Error(
-            "Admin login token not found."
-          );
-        }
-
-        const response =
-          await fetch(
-            "http://localhost:5000/api/applications",
-            {
-              method: "GET",
-
-              headers: {
-                Authorization:
-                  `Bearer ${token}`,
-              },
-            }
-          );
-
-        const data =
-          await response.json();
-
-        console.log(
-          "Applications API Response:",
-          data
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            data.message ||
-              "Failed to fetch applications"
-          );
-        }
-
-        setApplications(
-          Array.isArray(
-            data
-          )
-            ? data
-            : data.applications || []
-        );
-      } catch (error) {
-        console.error(
-          "Applications Fetch Error:",
-          error
-        );
-
-        setApplicationsError(
-          error.message ||
-            "Unable to load applications"
-        );
-      } finally {
-        setApplicationsLoading(
-          false
+      if (!token) {
+        throw new Error(
+          "Admin login token not found."
         );
       }
-    };
+
+      const response = await fetch(
+        `${API_URL}/api/applications`,
+        {
+          method: "GET",
+
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      console.log(
+        "Applications API Response:",
+        data
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Failed to fetch applications"
+        );
+      }
+
+      setApplications(
+        Array.isArray(data)
+          ? data
+          : data.applications || []
+      );
+    } catch (error) {
+      console.error(
+        "Applications Fetch Error:",
+        error
+      );
+
+      setApplicationsError(
+        error.message ||
+          "Unable to load applications"
+      );
+    } finally {
+      setApplicationsLoading(false);
+    }
+  };
 
   // =====================================================
   // UPDATE APPLICATION STATUS
@@ -711,44 +759,30 @@ const deleteJob = async (id) => {
     newStatus
   ) => {
     try {
-      const token =
-        localStorage.getItem("token");
+      const token = getToken();
 
       if (!token) {
-        alert(
-          "Admin login token not found."
-        );
+        alert("Admin login token not found.");
         return;
       }
 
-      console.log(
-        "Updating application:",
-        id,
-        newStatus
+      const response = await fetch(
+        `${API_URL}/api/applications/${id}/status`,
+        {
+          method: "PATCH",
+
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({
+            status: newStatus,
+          }),
+        }
       );
 
-      const response =
-        await fetch(
-          `http://localhost:5000/api/applications/${id}/status`,
-          {
-            method: "PATCH",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-
-              Authorization:
-                `Bearer ${token}`,
-            },
-
-            body: JSON.stringify({
-              status: newStatus,
-            }),
-          }
-        );
-
-      const data =
-        await response.json();
+      const data = await response.json();
 
       console.log(
         "Update Application Status Response:",
@@ -770,8 +804,7 @@ const deleteJob = async (id) => {
               application._id === id
                 ? {
                     ...application,
-                    status:
-                      newStatus,
+                    status: newStatus,
                   }
                 : application
           )
@@ -793,44 +826,35 @@ const deleteJob = async (id) => {
   // DELETE APPLICATION
   // =====================================================
 
-  const deleteApplication = async (
-    id
-  ) => {
-    const confirmed =
-      window.confirm(
-        "Are you sure you want to delete this application?"
-      );
+  const deleteApplication = async (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this application?"
+    );
 
     if (!confirmed) {
       return;
     }
 
     try {
-      const token =
-        localStorage.getItem("token");
+      const token = getToken();
 
       if (!token) {
-        alert(
-          "Admin login token not found."
-        );
+        alert("Admin login token not found.");
         return;
       }
 
-      const response =
-        await fetch(
-          `http://localhost:5000/api/applications/${id}`,
-          {
-            method: "DELETE",
+      const response = await fetch(
+        `${API_URL}/api/applications/${id}`,
+        {
+          method: "DELETE",
 
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        );
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
       console.log(
         "Delete Application Response:",
@@ -878,13 +902,7 @@ const deleteJob = async (id) => {
       setUsersLoading(true);
       setUsersError("");
 
-      const token =
-        localStorage.getItem("token");
-
-      console.log(
-        "Admin token:",
-        token
-      );
+      const token = getToken();
 
       if (!token) {
         throw new Error(
@@ -892,21 +910,18 @@ const deleteJob = async (id) => {
         );
       }
 
-      const response =
-        await fetch(
-          "http://localhost:5000/api/admin/users",
-          {
-            method: "GET",
+      const response = await fetch(
+        `${API_URL}/api/admin/users`,
+        {
+          method: "GET",
 
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        );
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
       console.log(
         "Users API Response:",
@@ -941,170 +956,149 @@ const deleteJob = async (id) => {
   };
 
   // =====================================================
-// ACTIVATE / DEACTIVATE USER
-// =====================================================
+  // ACTIVATE / DEACTIVATE USER
+  // =====================================================
 
-const toggleUserStatus = async (userId, currentStatus) => {
+  const toggleUserStatus = async (
+    userId,
+    currentStatus
+  ) => {
     try {
-        const token = localStorage.getItem("token");
+      const token = getToken();
 
-        if (!token) {
-            alert("Admin login token not found.");
-            return;
+      if (!token) {
+        alert("Admin login token not found.");
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/api/admin/users/${userId}/status`,
+        {
+          method: "PATCH",
+
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({
+            isActive: !currentStatus,
+          }),
         }
+      );
 
-        const response = await fetch(
-            `http://localhost:5000/api/admin/users/${userId}/status`,
-            {
-                method: "PATCH",
+      const data = await response.json();
 
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
+      console.log(
+        "User Status Response:",
+        data
+      );
 
-                body: JSON.stringify({
-                    isActive: !currentStatus,
-                }),
-            }
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Failed to update user status"
         );
+      }
 
-        const data = await response.json();
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user._id === userId
+            ? {
+                ...user,
+                isActive:
+                  data.user?.isActive ??
+                  !currentStatus,
+              }
+            : user
+        )
+      );
 
-        console.log("User Status Response:", data);
-
-        if (!response.ok) {
-            throw new Error(
-                data.message || "Failed to update user status"
-            );
-        }
-
-        // Update user in React state
-        setUsers((prevUsers) =>
-            prevUsers.map((user) =>
-                user._id === userId
-                    ? {
-                          ...user,
-                          isActive: data.user.isActive,
-                      }
-                    : user
-            )
-        );
-
-        alert(data.message);
-
+      alert(
+        data.message ||
+          "User status updated successfully"
+      );
     } catch (error) {
+      console.error(
+        "Toggle User Status Error:",
+        error
+      );
 
-        console.error(
-            "Toggle User Status Error:",
-            error
-        );
-
-        alert(error.message);
+      alert(
+        error.message ||
+          "Failed to update user status"
+      );
     }
-};
+  };
 
   // =====================================================
   // DELETE USER
   // =====================================================
-// =====================================================
-// DELETE USER
-// =====================================================
 
-const deleteUser = async (id) => {
+  const deleteUser = async (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this user?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
 
     try {
+      const token = getToken();
 
-        const token =
-            localStorage.getItem("token");
+      if (!token) {
+        alert("Admin login token not found.");
+        return;
+      }
 
-        if (!token) {
+      const response = await fetch(
+        `${API_URL}/api/admin/users/${id}`,
+        {
+          method: "DELETE",
 
-            alert(
-                "Admin login token not found."
-            );
-
-            return;
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
+      );
 
+      const data = await response.json();
 
-        const confirmDelete =
-            window.confirm(
-                "Are you sure you want to delete this user?"
-            );
+      console.log(
+        "Delete User Response:",
+        data
+      );
 
-        if (!confirmDelete) {
-            return;
-        }
-
-
-        const response =
-            await fetch(
-                `http://localhost:5000/api/admin/users/${id}`,
-                {
-                    method: "DELETE",
-
-                    headers: {
-                        Authorization:
-                            `Bearer ${token}`,
-                    },
-                }
-            );
-
-
-        const data =
-            await response.json();
-
-
-        console.log(
-            "Delete User Response:",
-            data
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Failed to delete user"
         );
+      }
 
+      setUsers((prevUsers) =>
+        prevUsers.filter(
+          (user) => user._id !== id
+        )
+      );
 
-        if (!response.ok) {
-
-            throw new Error(
-                data.message ||
-                "Failed to delete user"
-            );
-
-        }
-
-
-        // Remove from frontend state
-
-        setUsers(
-            (prevUsers) =>
-                prevUsers.filter(
-                    (user) =>
-                        user._id !== id
-                )
-        );
-
-
-        alert(
-            "User deleted successfully"
-        );
-
-
+      alert("User deleted successfully!");
     } catch (error) {
+      console.error(
+        "Delete User Error:",
+        error
+      );
 
-        console.error(
-            "Delete User Error:",
-            error
-        );
-
-        alert(
-            error.message
-        );
+      alert(
+        error.message ||
+          "Failed to delete user"
+      );
     }
-};
- 
+  };
 
   // =====================================================
   // FETCH COMPANIES
-  // Companies are generated from posted jobs
   // =====================================================
 
   const fetchCompanies = async () => {
@@ -1112,13 +1106,11 @@ const deleteUser = async (id) => {
       setCompaniesLoading(true);
       setCompaniesError("");
 
-      const response =
-        await fetch(
-          "http://localhost:5000/api/jobs"
-        );
+      const response = await fetch(
+        `${API_URL}/api/jobs`
+      );
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
       console.log(
         "Jobs for Companies:",
@@ -1132,10 +1124,9 @@ const deleteUser = async (id) => {
         );
       }
 
-      const jobsData =
-        Array.isArray(data)
-          ? data
-          : data.jobs || [];
+      const jobsData = Array.isArray(data)
+        ? data
+        : data.jobs || [];
 
       const companyMap = {};
 
@@ -1156,8 +1147,7 @@ const deleteUser = async (id) => {
           };
         }
 
-        companyMap[companyName].jobs +=
-          1;
+        companyMap[companyName].jobs += 1;
 
         if (
           jobItem.location &&
@@ -1200,9 +1190,9 @@ const deleteUser = async (id) => {
   const addCompany = async () => {
     try {
       if (
-        !company.name ||
-        !company.email ||
-        !company.location
+        !company.name.trim() ||
+        !company.email.trim() ||
+        !company.location.trim()
       ) {
         alert(
           "Please provide company name, email and location."
@@ -1210,38 +1200,37 @@ const deleteUser = async (id) => {
         return;
       }
 
-      const token =
-        localStorage.getItem("token");
+      const token = getToken();
 
       if (!token) {
-        alert(
-          "Admin login token not found."
-        );
+        alert("Admin login token not found.");
         return;
       }
 
-      const response =
-        await fetch(
-          "http://localhost:5000/api/companies",
-          {
-            method: "POST",
+      const companyData = {
+        name: company.name.trim(),
+        email: company.email.trim(),
+        location: company.location.trim(),
+        website: company.website.trim(),
+        description:
+          company.description.trim(),
+      };
 
-            headers: {
-              "Content-Type":
-                "application/json",
+      const response = await fetch(
+        `${API_URL}/api/companies`,
+        {
+          method: "POST",
 
-              Authorization:
-                `Bearer ${token}`,
-            },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
 
-            body: JSON.stringify(
-              company
-            ),
-          }
-        );
+          body: JSON.stringify(companyData),
+        }
+      );
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
       console.log(
         "Create Company Response:",
@@ -1252,15 +1241,6 @@ const deleteUser = async (id) => {
         throw new Error(
           data.message ||
             "Failed to create company"
-        );
-      }
-
-      if (data.company) {
-        setCompanies(
-          (prevCompanies) => [
-            data.company,
-            ...prevCompanies,
-          ]
         );
       }
 
@@ -1276,11 +1256,6 @@ const deleteUser = async (id) => {
         "Company added successfully!"
       );
 
-      /*
-        Since your Companies page currently
-        displays companies based on jobs,
-        refresh the company list after adding.
-      */
       await fetchCompanies();
     } catch (error) {
       console.error(
@@ -1300,7 +1275,9 @@ const deleteUser = async (id) => {
   // =====================================================
 
   const logout = () => {
-    localStorage.clear();
+    localStorage.removeItem("token");
+    localStorage.removeItem("adminLoggedIn");
+
     navigate("/login");
   };
 
@@ -1347,13 +1324,8 @@ const deleteUser = async (id) => {
       <aside className="sidebar">
 
         <div className="logo">
-          <h2>
-            💼 JobPortal
-          </h2>
-
-          <p>
-            Admin Panel
-          </p>
+          <h2>💼 JobPortal</h2>
+          <p>Admin Panel</p>
         </div>
 
         <button
@@ -1366,7 +1338,7 @@ const deleteUser = async (id) => {
             setPage("dashboard")
           }
         >
-          Dashboard
+          📊 Dashboard
         </button>
 
         <button
@@ -1379,7 +1351,7 @@ const deleteUser = async (id) => {
             setPage("companies")
           }
         >
-          Companies
+          🏢 Companies
         </button>
 
         <button
@@ -1392,7 +1364,7 @@ const deleteUser = async (id) => {
             setPage("jobs")
           }
         >
-          Jobs
+          💼 Jobs
         </button>
 
         <button
@@ -1405,7 +1377,7 @@ const deleteUser = async (id) => {
             setPage("applications")
           }
         >
-          Applications
+          📄 Applications
         </button>
 
         <button
@@ -1418,14 +1390,14 @@ const deleteUser = async (id) => {
             setPage("users")
           }
         >
-          Users
+          👥 Users
         </button>
 
         <button
           className="logout"
           onClick={logout}
         >
-          Logout
+          🚪 Logout
         </button>
 
       </aside>
@@ -1436,13 +1408,13 @@ const deleteUser = async (id) => {
 
       <main className="main">
 
-        {/* TOPBAR */}
+        {/* =================================================
+            TOPBAR
+        ================================================= */}
 
         <div className="topbar">
 
-          <h1>
-            Admin Dashboard
-          </h1>
+          <h1>Admin Dashboard</h1>
 
           <div className="admin">
             👤 Admin
@@ -1461,30 +1433,28 @@ const deleteUser = async (id) => {
 
             <div className="cards">
 
-              {/* Companies */}
-
-              <div className="card blue">
-
+              <div className="card blue clickable-card"
+              onClick={()=>setPage("selected")}>
                 <div className="card-icon">
-                  🏢
+                  ✅
+                  
                 </div>
 
                 <div>
                   <h2>
-                    {companies.length}
+                    {selectedCandidates}
                   </h2>
 
                   <p>
-                    Companies
+                    Selected Candidates
                   </p>
                 </div>
-
               </div>
 
-              {/* Jobs */}
-
-              <div className="card green">
-
+              <div 
+              className="card green clickable-card"
+    onClick={() => setPage("jobs")}
+>
                 <div className="card-icon">
                   💼
                 </div>
@@ -1494,17 +1464,12 @@ const deleteUser = async (id) => {
                     {jobs.length}
                   </h2>
 
-                  <p>
-                    Jobs
-                  </p>
+                  <p>Jobs</p>
                 </div>
-
               </div>
 
-              {/* Applications */}
-
-              <div className="card orange">
-
+              <div className="card orange clickable-card"
+    onClick={() => setPage("applications")}>
                 <div className="card-icon">
                   📄
                 </div>
@@ -1514,17 +1479,12 @@ const deleteUser = async (id) => {
                     {applications.length}
                   </h2>
 
-                  <p>
-                    Applications
-                  </p>
+                  <p>Applications</p>
                 </div>
-
               </div>
 
-              {/* Users */}
-
-              <div className="card purple">
-
+              <div className="card purple clickable-card"
+    onClick={() => setPage("users")}>
                 <div className="card-icon">
                   👥
                 </div>
@@ -1534,11 +1494,8 @@ const deleteUser = async (id) => {
                     {users.length}
                   </h2>
 
-                  <p>
-                    Users
-                  </p>
+                  <p>Users</p>
                 </div>
-
               </div>
 
             </div>
@@ -1547,7 +1504,7 @@ const deleteUser = async (id) => {
 
             <div className="dashboard-grid">
 
-              {/* APPLICATION OVERVIEW */}
+              {/* APPLICATION CHART */}
 
               <div className="dashboard-panel">
 
@@ -1571,22 +1528,17 @@ const deleteUser = async (id) => {
 
                 <div className="chart-container">
 
-                  {applications.length >
-                  0 ? (
+                  {applications.length > 0 ? (
+
                     <ResponsiveContainer
                       width="100%"
                       height={300}
                     >
+
                       <LineChart
                         data={
                           applicationChartData
                         }
-                        margin={{
-                          top: 10,
-                          right: 20,
-                          left: 0,
-                          bottom: 10,
-                        }}
                       >
 
                         <CartesianGrid
@@ -1617,19 +1569,21 @@ const deleteUser = async (id) => {
                         />
 
                       </LineChart>
+
                     </ResponsiveContainer>
+
                   ) : (
+
                     <div className="empty-chart">
 
-                      <div>
-                        📊
-                      </div>
+                      <div>📊</div>
 
                       <p>
                         No application data available
                       </p>
 
                     </div>
+
                   )}
 
                 </div>
@@ -1656,96 +1610,97 @@ const deleteUser = async (id) => {
 
                 <div className="recent-applications">
 
-                  {applications.length >
-                  0 ? (
+                  {applications.length > 0 ? (
+
                     [...applications]
                       .sort(
                         (a, b) =>
                           new Date(
-                            b.createdAt || 0
+                            b.createdAt ||
+                              b.appliedAt ||
+                              0
                           ) -
                           new Date(
-                            a.createdAt || 0
+                            a.createdAt ||
+                              a.appliedAt ||
+                              0
                           )
                       )
                       .slice(0, 5)
                       .map(
-                        (application) => (
-                          <div
-                            className="recent-application"
-                            key={
-                              application._id
-                            }
-                          >
+                        (application) => {
 
-                            <div className="candidate-avatar">
+                          const candidateName =
+                            application
+                              .candidate
+                              ?.name ||
+                            application
+                              .candidate
+                              ?.username ||
+                            "Unknown Candidate";
 
-                              {(
-                                application
-                                  .candidate
-                                  ?.name ||
-                                application
-                                  .candidate
-                                  ?.username ||
-                                "U"
-                              )
-                                .charAt(0)
-                                .toUpperCase()}
+                          return (
+                            <div
+                              className="recent-application"
+                              key={
+                                application._id
+                              }
+                            >
 
-                            </div>
+                              <div className="candidate-avatar">
+                                {candidateName
+                                  .charAt(0)
+                                  .toUpperCase()}
+                              </div>
 
-                            <div className="application-info">
+                              <div className="application-info">
 
-                              <strong>
+                                <strong>
+                                  {candidateName}
+                                </strong>
+
+                                <span>
+                                  {
+                                    application
+                                      .job
+                                      ?.title ||
+                                    "Unknown Job"
+                                  }
+                                </span>
+
+                              </div>
+
+                              <span
+                                className={`status ${
+                                  (
+                                    application.status ||
+                                    "Pending"
+                                  ).toLowerCase()
+                                }`}
+                              >
                                 {
-                                  application
-                                    .candidate
-                                    ?.name ||
-                                  application
-                                    .candidate
-                                    ?.username ||
-                                  "Unknown Candidate"
-                                }
-                              </strong>
-
-                              <span>
-                                {
-                                  application
-                                    .job
-                                    ?.title ||
-                                  "Unknown Job"
+                                  application.status ||
+                                  "Pending"
                                 }
                               </span>
 
                             </div>
-
-                            <span
-                              className={`status ${(
-                                application.status ||
-                                "Pending"
-                              ).toLowerCase()}`}
-                            >
-                              {
-                                application.status ||
-                                "Pending"
-                              }
-                            </span>
-
-                          </div>
-                        )
+                          );
+                        }
                       )
+
                   ) : (
+
                     <div className="no-applications">
 
-                      <div>
-                        📄
-                      </div>
+                      <div>📄</div>
 
                       <p>
                         No applications found
                       </p>
 
                     </div>
+
                   )}
 
                 </div>
@@ -1753,9 +1708,7 @@ const deleteUser = async (id) => {
                 <button
                   className="view-all-btn"
                   onClick={() =>
-                    setPage(
-                      "applications"
-                    )
+                    setPage("applications")
                   }
                 >
                   View All Applications →
@@ -1768,19 +1721,128 @@ const deleteUser = async (id) => {
           </div>
         )}
 
+{/* =====================================================
+    SELECTED CANDIDATES
+===================================================== */}
+
+{page === "selected" && (
+  <div className="dashboard-content">
+
+    <div className="panel">
+
+      <div className="panel-header">
+
+        <div>
+          <h2>Selected Candidates</h2>
+          <p>
+            Candidates whose applications were accepted
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setPage("dashboard")}
+        >
+          ← Back to Dashboard
+        </button>
+
+      </div>
+
+      {applications
+        .filter(
+          (application) =>
+            String(application.status || "")
+              .trim()
+              .toLowerCase() === "accepted"
+        )
+        .length === 0 ? (
+
+        <div className="empty-state">
+          <h3>No Selected Candidates</h3>
+
+          <p>
+            There are no accepted applications yet.
+          </p>
+        </div>
+
+      ) : (
+
+        <div className="table-container">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Candidate</th>
+                <th>Email</th>
+                <th>Job</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              {applications
+                .filter(
+                  (application) =>
+                    String(application.status || "")
+                      .trim()
+                      .toLowerCase() === "accepted"
+                )
+                .map((application) => (
+
+                  <tr key={application._id}>
+
+                    <td>
+                      {application.candidate?.name ||
+                        application.candidate?.username ||
+                        "Candidate"}
+                    </td>
+
+                    <td>
+                      {application.candidate?.email ||
+                        "N/A"}
+                    </td>
+
+                    <td>
+                      {application.job?.title ||
+                        "Job"}
+                    </td>
+
+                    <td>
+                      <span className="status-badge accepted">
+                        Accepted
+                      </span>
+                    </td>
+
+                  </tr>
+
+                ))}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      )}
+
+    </div>
+
+  </div>
+)}
         {/* =================================================
             COMPANIES
         ================================================= */}
 
         {page === "companies" && (
+
           <div className="panel">
 
             <div className="panel-header">
 
               <div>
-                <h2>
-                  Companies
-                </h2>
+                <h2>Companies</h2>
 
                 <p>
                   Companies available through posted jobs
@@ -1789,9 +1851,7 @@ const deleteUser = async (id) => {
 
               <button
                 type="button"
-                onClick={
-                  fetchCompanies
-                }
+                onClick={fetchCompanies}
               >
                 Refresh
               </button>
@@ -1799,38 +1859,23 @@ const deleteUser = async (id) => {
             </div>
 
             {companiesLoading && (
-              <div
-                style={{
-                  textAlign:
-                    "center",
-                  padding: "30px",
-                }}
-              >
-                <p>
-                  Loading companies...
-                </p>
-              </div>
+              <p>Loading companies...</p>
             )}
 
             {companiesError && (
-              <div
-                style={{
-                  textAlign:
-                    "center",
-                  padding: "30px",
-                  color: "red",
-                }}
-              >
+              <div>
 
-                <p>
+                <p
+                  style={{
+                    color: "red",
+                  }}
+                >
                   {companiesError}
                 </p>
 
                 <button
                   type="button"
-                  onClick={
-                    fetchCompanies
-                  }
+                  onClick={fetchCompanies}
                 >
                   Try Again
                 </button>
@@ -1840,111 +1885,116 @@ const deleteUser = async (id) => {
 
             {!companiesLoading &&
               !companiesError && (
-                <>
-                  {companies.length >
-                  0 ? (
-                    <table>
 
-                      <thead>
-                        <tr>
+                companies.length > 0 ? (
 
-                          <th>
-                            Company
-                          </th>
+                  <table>
 
-                          <th>
-                            Jobs
-                          </th>
+                    <thead>
+                      <tr>
 
-                          <th>
-                            Locations
-                          </th>
+                        <th>
+                          Company
+                        </th>
 
-                        </tr>
-                      </thead>
+                        <th>
+                          Jobs
+                        </th>
 
-                      <tbody>
+                        <th>
+                          Locations
+                        </th>
 
-                        {companies.map(
-                          (companyItem) => (
-                            <tr
-                              key={
-                                companyItem.id
-                              }
-                            >
+                      </tr>
+                    </thead>
 
-                              <td>
-                                <strong>
-                                  {
-                                    companyItem.name
-                                  }
-                                </strong>
-                              </td>
+                    <tbody>
 
-                              <td>
+                      {companies.map(
+                        (companyItem) => (
+
+                          <tr
+                            key={
+                              companyItem.id
+                            }
+                          >
+
+                            <td>
+                              <strong>
                                 {
-                                  companyItem.jobs
-                                }{" "}
-                                {
-                                  companyItem.jobs ===
-                                  1
-                                    ? "Job"
-                                    : "Jobs"
+                                  companyItem.name
                                 }
-                              </td>
+                              </strong>
+                            </td>
 
-                              <td>
-                                {companyItem
+                            <td>
+                              {
+                                companyItem.jobs
+                              }{" "}
+                              {
+                                companyItem.jobs ===
+                                1
+                                  ? "Job"
+                                  : "Jobs"
+                              }
+                            </td>
+
+                            <td>
+                              {
+                                companyItem
                                   .locations
-                                  ?.length >
-                                0
+                                  ?.length > 0
                                   ? companyItem.locations.join(
                                       ", "
                                     )
-                                  : "Not specified"}
-                              </td>
+                                  : "Not specified"
+                              }
+                            </td>
 
-                            </tr>
-                          )
-                        )}
+                          </tr>
 
-                      </tbody>
+                        )
+                      )}
 
-                    </table>
-                  ) : (
-                    <div
-                      style={{
-                        textAlign:
-                          "center",
-                        padding:
-                          "40px",
-                      }}
+                    </tbody>
+
+                  </table>
+
+                ) : (
+
+                  <div
+                    style={{
+                      textAlign: "center",
+                      padding: "40px",
+                    }}
+                  >
+
+                    <h3>
+                      No Companies Found
+                    </h3>
+
+                    <p>
+                      Companies will appear here
+                      automatically when jobs are added.
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPage("jobs")
+                      }
                     >
+                      Go to Jobs
+                    </button>
 
-                      <h3>
-                        No Companies Found
-                      </h3>
+                  </div>
 
-                      <p>
-                        Companies will appear here
-                        automatically when jobs are added.
-                      </p>
+                )
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setPage("jobs")
-                        }
-                      >
-                        Go to Jobs
-                      </button>
-
-                    </div>
-                  )}
-                </>
               )}
 
           </div>
+
         )}
 
         {/* =================================================
@@ -1952,16 +2002,30 @@ const deleteUser = async (id) => {
         ================================================= */}
 
         {page === "jobs" && (
+
           <div className="panel">
 
-            <h2>
-              Manage Jobs
-            </h2>
+            <div className="panel-header">
+
+              <div>
+                <h2>Manage Jobs</h2>
+
+                <p>
+                  Create, edit and delete job postings
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={fetchJobs}
+              >
+                Refresh
+              </button>
+
+            </div>
 
             {jobsLoading && (
-              <p>
-                Loading jobs...
-              </p>
+              <p>Loading jobs...</p>
             )}
 
             {jobsError && (
@@ -1985,8 +2049,7 @@ const deleteUser = async (id) => {
                 onChange={(e) =>
                   setJob({
                     ...job,
-                    title:
-                      e.target.value,
+                    title: e.target.value,
                   })
                 }
               />
@@ -1998,8 +2061,7 @@ const deleteUser = async (id) => {
                 onChange={(e) =>
                   setJob({
                     ...job,
-                    company:
-                      e.target.value,
+                    company: e.target.value,
                   })
                 }
               />
@@ -2011,8 +2073,7 @@ const deleteUser = async (id) => {
                 onChange={(e) =>
                   setJob({
                     ...job,
-                    location:
-                      e.target.value,
+                    location: e.target.value,
                   })
                 }
               />
@@ -2022,8 +2083,7 @@ const deleteUser = async (id) => {
                 onChange={(e) =>
                   setJob({
                     ...job,
-                    type:
-                      e.target.value,
+                    type: e.target.value,
                   })
                 }
               >
@@ -2057,8 +2117,7 @@ const deleteUser = async (id) => {
                 onChange={(e) =>
                   setJob({
                     ...job,
-                    salary:
-                      e.target.value,
+                    salary: e.target.value,
                   })
                 }
               />
@@ -2083,17 +2142,14 @@ const deleteUser = async (id) => {
                 onChange={(e) =>
                   setJob({
                     ...job,
-                    skills:
-                      e.target.value,
+                    skills: e.target.value,
                   })
                 }
               />
 
               <textarea
                 placeholder="Job Description"
-                value={
-                  job.description
-                }
+                value={job.description}
                 onChange={(e) =>
                   setJob({
                     ...job,
@@ -2105,9 +2161,7 @@ const deleteUser = async (id) => {
 
               <textarea
                 placeholder="Responsibilities"
-                value={
-                  job.responsibilities
-                }
+                value={job.responsibilities}
                 onChange={(e) =>
                   setJob({
                     ...job,
@@ -2119,9 +2173,7 @@ const deleteUser = async (id) => {
 
               <textarea
                 placeholder="Eligibility"
-                value={
-                  job.eligibility
-                }
+                value={job.eligibility}
                 onChange={(e) =>
                   setJob({
                     ...job,
@@ -2133,9 +2185,7 @@ const deleteUser = async (id) => {
 
               <textarea
                 placeholder="Requirements"
-                value={
-                  job.requirements
-                }
+                value={job.requirements}
                 onChange={(e) =>
                   setJob({
                     ...job,
@@ -2157,10 +2207,9 @@ const deleteUser = async (id) => {
                 }
               />
 
-              {/* BUTTONS */}
-
               {editingJobId ? (
-                <>
+
+                <div className="form-actions">
 
                   <button
                     type="button"
@@ -2174,21 +2223,22 @@ const deleteUser = async (id) => {
 
                   <button
                     type="button"
-                    onClick={
-                      resetJobForm
-                    }
+                    onClick={resetJobForm}
                   >
                     Cancel
                   </button>
 
-                </>
+                </div>
+
               ) : (
+
                 <button
                   type="button"
                   onClick={addJob}
                 >
                   Add Job
                 </button>
+
               )}
 
             </div>
@@ -2197,9 +2247,11 @@ const deleteUser = async (id) => {
 
             {!jobsLoading &&
               !jobsError && (
+
                 <table>
 
                   <thead>
+
                     <tr>
 
                       <th>
@@ -2219,13 +2271,16 @@ const deleteUser = async (id) => {
                       </th>
 
                     </tr>
+
                   </thead>
 
                   <tbody>
 
                     {jobs.length > 0 ? (
+
                       jobs.map(
                         (jobItem) => (
+
                           <tr
                             key={
                               jobItem._id
@@ -2278,9 +2333,12 @@ const deleteUser = async (id) => {
                             </td>
 
                           </tr>
+
                         )
                       )
+
                     ) : (
+
                       <tr>
 
                         <td
@@ -2296,14 +2354,17 @@ const deleteUser = async (id) => {
                         </td>
 
                       </tr>
+
                     )}
 
                   </tbody>
 
                 </table>
+
               )}
 
           </div>
+
         )}
 
         {/* =================================================
@@ -2311,11 +2372,31 @@ const deleteUser = async (id) => {
         ================================================= */}
 
         {page === "applications" && (
+
           <div className="panel">
 
-            <h2>
-              Applications
-            </h2>
+            <div className="panel-header">
+
+              <div>
+
+                <h2>
+                  Applications
+                </h2>
+
+                <p>
+                  Manage candidate applications
+                </p>
+
+              </div>
+
+              <button
+                type="button"
+                onClick={fetchApplications}
+              >
+                Refresh
+              </button>
+
+            </div>
 
             {applicationsLoading && (
               <p>
@@ -2327,8 +2408,7 @@ const deleteUser = async (id) => {
               <p
                 style={{
                   color: "red",
-                  marginTop:
-                    "15px",
+                  marginTop: "15px",
                 }}
               >
                 {applicationsError}
@@ -2337,9 +2417,11 @@ const deleteUser = async (id) => {
 
             {!applicationsLoading &&
               !applicationsError && (
+
                 <table>
 
                   <thead>
+
                     <tr>
 
                       <th>
@@ -2351,7 +2433,11 @@ const deleteUser = async (id) => {
                       </th>
 
                       <th>
-                        Status
+                       Status
+                      </th>
+
+                      <th>
+                        Resume
                       </th>
 
                       <th>
@@ -2359,133 +2445,195 @@ const deleteUser = async (id) => {
                       </th>
 
                     </tr>
+
                   </thead>
 
                   <tbody>
 
-                    {applications.length >
-                    0 ? (
+                    {applications.length > 0 ? (
+
                       applications.map(
-                        (application) => (
-                          <tr
-                            key={
-                              application._id
-                            }
-                          >
+                        (application) => {
 
-                            <td>
+                          const candidateName =
+                            application
+                              .candidate
+                              ?.name ||
+                            application
+                              .candidate
+                              ?.username ||
+                            "Unknown Candidate";
 
-                              <strong>
-                                {
-                                  application
-                                    .candidate
-                                    ?.name ||
-                                  application
-                                    .candidate
-                                    ?.username ||
-                                  "Unknown Candidate"
-                                }
-                              </strong>
+                          const resumeUrl =
+                            getResumeUrl(
+                              application
+                            );
 
-                              <br />
+                          return (
 
-                              <small>
-                                {
-                                  application
-                                    .candidate
-                                    ?.email ||
-                                  ""
-                                }
-                              </small>
+                            <tr
+                              key={
+                                application._id
+                              }
+                            >
 
-                            </td>
+                              {/* CANDIDATE */}
 
-                            <td>
+                              <td>
 
-                              <strong>
-                                {
-                                  application
-                                    .job
-                                    ?.title ||
-                                  "Unknown Job"
-                                }
-                              </strong>
+                                <strong>
+                                  {
+                                    candidateName
+                                  }
+                                </strong>
 
-                              <br />
+                                <br />
 
-                              <small>
-                                {
-                                  application
-                                    .job
-                                    ?.company ||
-                                  ""
-                                }
-                              </small>
+                                <small>
+                                  {
+                                    application
+                                      .candidate
+                                      ?.email ||
+                                    ""
+                                  }
+                                </small>
 
-                            </td>
+                              </td>
 
-                            <td>
+                              {/* JOB */}
 
-                              <select
-                                value={
-                                  application.status ||
-                                  "Pending"
-                                }
-                                onChange={(
-                                  e
-                                ) =>
-                                  updateStatus(
-                                    application._id,
-                                    e.target
-                                      .value
-                                  )
-                                }
-                              >
+                              <td>
 
-                                <option value="Pending">
-                                  Pending
-                                </option>
+                                <strong>
+                                  {
+                                    application
+                                      .job
+                                      ?.title ||
+                                    "Unknown Job"
+                                  }
+                                </strong>
 
-                                <option value="Shortlisted">
-                                  Shortlisted
-                                </option>
+                                <br />
 
-                                <option value="Rejected">
-                                  Rejected
-                                </option>
+                                <small>
+                                  {
+                                    application
+                                      .job
+                                      ?.company ||
+                                    ""
+                                  }
+                                </small>
 
-                                <option value="Accepted">
-                                  Accepted
-                                </option>
+                              </td>
 
-                              </select>
+                             
+                              {/* STATUS */}
 
-                            </td>
+                              <td>
 
-                            <td>
+                                <select
+                                  value={
+                                    application.status ||
+                                    "Pending"
+                                  }
+                                  onChange={(e) =>
+                                    updateStatus(
+                                      application._id,
+                                      e.target.value
+                                    )
+                                  }
+                                >
 
-                              <button
-                                type="button"
-                                className="delete"
-                                onClick={() =>
-                                  deleteApplication(
-                                    application._id
-                                  )
-                                }
-                              >
-                                Delete
-                              </button>
+                                  <option value="Pending">
+                                    Pending
+                                  </option>
 
-                            </td>
+                                  <option value="Shortlisted">
+                                    Shortlisted
+                                  </option>
 
-                          </tr>
-                        )
+                                  <option value="Rejected">
+                                    Rejected
+                                  </option>
+
+                                  <option value="Accepted">
+                                    Accepted
+                                  </option>
+
+                                </select>
+
+                              </td>
+{/* RESUME */}
+
+<td>
+
+  {application.resume ? (
+
+    <div className="resume-actions">
+
+      <button
+        type="button"
+        className="view-resume-btn"
+        onClick={() =>
+          viewResume(application)
+        }
+      >
+        👁 View Resume
+      </button>
+
+      <button
+        type="button"
+        className="download-resume-btn"
+        onClick={() =>
+          downloadResume(application)
+        }
+      >
+        ⬇ Download
+      </button>
+
+    </div>
+
+  ) : (
+
+    <span className="no-resume">
+      No Resume
+    </span>
+
+  )}
+
+</td>
+
+
+{/* ACTION */}
+
+<td>
+
+  <button
+    type="button"
+    className="delete"
+    onClick={() =>
+      deleteApplication(application._id)
+    }
+  >
+    Delete
+  </button>
+
+</td>
+                    
+  
+
+                            </tr>
+
+                          );
+                        }
                       )
+
                     ) : (
+
                       <tr>
 
                         <td
-                          colSpan="4"
+                          colSpan="5"
                           style={{
                             textAlign:
                               "center",
@@ -2497,288 +2645,287 @@ const deleteUser = async (id) => {
                         </td>
 
                       </tr>
+
                     )}
 
                   </tbody>
 
                 </table>
+
               )}
 
           </div>
+
         )}
 
-     {/* =================================================
-    USERS
-================================================= */}
+        {/* =================================================
+            USERS
+        ================================================= */}
 
-{page === "users" && (
+        {page === "users" && (
 
-    <div className="panel">
+          <div className="panel">
 
-        {/* HEADER */}
+            <div className="panel-header">
 
-        <div className="panel-header">
-
-            <div>
+              <div>
 
                 <h2>
-                    Users
+                  Users
                 </h2>
 
                 <p>
-                    Manage registered users
+                  Manage registered users
                 </p>
+
+              </div>
+
+              <button
+                type="button"
+                onClick={fetchUsers}
+              >
+                Refresh
+              </button>
 
             </div>
 
-            <button
-                type="button"
-                onClick={fetchUsers}
-            >
-                Refresh
-            </button>
+            {/* SEARCH */}
 
-        </div>
+            <div className="user-search">
 
+              <input
+                type="text"
+                placeholder="Search by name, email or role..."
+                value={userSearch}
+                onChange={(e) =>
+                  setUserSearch(
+                    e.target.value
+                  )
+                }
+              />
 
-        {/* LOADING */}
+            </div>
 
-        {usersLoading && (
+            {/* LOADING */}
 
-            <p>
+            {usersLoading && (
+              <p>
                 Loading users...
-            </p>
+              </p>
+            )}
 
-        )}
+            {/* ERROR */}
 
-
-        {/* ERROR */}
-
-        {usersError && (
-
-            <p
+            {usersError && (
+              <p
                 style={{
-                    color: "red",
-                    marginTop: "15px",
+                  color: "red",
+                  marginTop: "15px",
                 }}
-            >
+              >
                 {usersError}
-            </p>
+              </p>
+            )}
 
-        )}
-        <div className="user-search">
-    <input
-        type="text"
-        placeholder="Search by name, email or role..."
-        value={userSearch}
-        onChange={(e) => setUserSearch(e.target.value)}
-    />
-</div>
+            {/* USERS TABLE */}
 
+            {!usersLoading &&
+              !usersError && (
 
-        {/* USERS TABLE */}
+                <table>
 
-        {!usersLoading &&
-            !usersError && (
-
-            <table>
-
-                <thead>
+                  <thead>
 
                     <tr>
 
-                        <th>
-                            Name
-                        </th>
+                      <th>
+                        Name
+                      </th>
 
-                        <th>
-                            Email
-                        </th>
+                      <th>
+                        Email
+                      </th>
 
-                        <th>
-                            Role
-                        </th>
+                      <th>
+                        Role
+                      </th>
 
-                        <th>
-                            Status
-                        </th>
+                      <th>
+                        Status
+                      </th>
 
-                        <th>
-                            Action
-                        </th>
+                      <th>
+                        Action
+                      </th>
 
                     </tr>
 
-                </thead>
+                  </thead>
 
-
-                <tbody>
+                  <tbody>
 
                     {filteredUsers.length > 0 ? (
 
-                        filteredUsers.map((u) => (
+                      filteredUsers.map(
+                        (u) => (
 
-                            <tr
-                                key={u._id}
-                            >
+                          <tr
+                            key={
+                              u._id
+                            }
+                          >
 
-                                {/* NAME */}
+                            {/* NAME */}
 
-                                <td>
+                            <td>
 
-                                    {u.name ||
-                                        u.username ||
-                                        "No Name"}
+                              {
+                                u.name ||
+                                u.username ||
+                                "No Name"
+                              }
 
-                                </td>
+                            </td>
 
+                            {/* EMAIL */}
 
-                                {/* EMAIL */}
+                            <td>
+                              {u.email}
+                            </td>
 
-                                <td>
+                            {/* ROLE */}
 
-                                    {u.email}
+                            <td>
 
-                                </td>
+                              <span
+                                className={
+                                  u.role ===
+                                  "admin"
+                                    ? "role-admin"
+                                    : "role-candidate"
+                                }
+                              >
+                                {u.role}
+                              </span>
 
+                            </td>
 
-                                {/* ROLE */}
+                            {/* STATUS */}
 
-                                <td>
+                            <td>
 
-                                    <span
-                                        className={
-                                            u.role === "admin"
-                                                ? "role-admin"
-                                                : "role-candidate"
-                                        }
-                                    >
-                                        {u.role}
-                                    </span>
+                              {u.role ===
+                              "admin" ? (
 
-                                </td>
+                                <span className="status-badge active">
+                                  Active
+                                </span>
 
+                              ) : (
 
-                                {/* STATUS */}
+                                <span
+                                  className={
+                                    u.isActive
+                                      ? "status-badge active"
+                                      : "status-badge inactive"
+                                  }
+                                >
+                                  {u.isActive
+                                    ? "Active"
+                                    : "Inactive"}
+                                </span>
 
-                                <td>
+                              )}
 
-                                    {u.role === "admin" ? (
+                            </td>
 
-                                        <span className="status-badge active">
-                                            Active
-                                        </span>
+                            {/* ACTION */}
 
-                                    ) : (
+                            <td>
 
-                                        <span
-                                            className={
-                                                u.isActive
-                                                    ? "status-badge active"
-                                                    : "status-badge inactive"
-                                            }
-                                        >
-                                            {u.isActive
-                                                ? "Active"
-                                                : "Inactive"}
-                                        </span>
+                              {u.role !==
+                              "admin" ? (
 
-                                    )}
+                                <div className="user-actions">
 
-                                </td>
+                                  <button
+                                    type="button"
+                                    className={
+                                      u.isActive
+                                        ? "deactivate-btn"
+                                        : "activate-btn"
+                                    }
+                                    onClick={() =>
+                                      toggleUserStatus(
+                                        u._id,
+                                        u.isActive
+                                      )
+                                    }
+                                  >
+                                    {u.isActive
+                                      ? "Deactivate"
+                                      : "Activate"}
+                                  </button>
 
+                                  <button
+                                    type="button"
+                                    className="delete"
+                                    onClick={() =>
+                                      deleteUser(
+                                        u._id
+                                      )
+                                    }
+                                  >
+                                    Delete
+                                  </button>
 
-                                {/* ACTION */}
+                                </div>
 
-                                <td>
+                              ) : (
 
-                                    {u.role !== "admin" ? (
+                                <span className="admin-protected">
+                                  Protected
+                                </span>
 
-                                        <div
-                                            className="user-actions"
-                                        >
+                              )}
 
-                                            {/* ACTIVATE / DEACTIVATE */}
+                            </td>
 
-                                            <button
-                                                type="button"
-                                                className={
-                                                    u.isActive
-                                                        ? "deactivate-btn"
-                                                        : "activate-btn"
-                                                }
-                                                onClick={() =>
-                                                    toggleUserStatus(
-                                                        u._id,
-                                                        u.isActive
-                                                    )
-                                                }
-                                            >
-                                                {u.isActive
-                                                    ? "Deactivate"
-                                                    : "Activate"}
-                                            </button>
+                          </tr>
 
-
-                                            {/* DELETE */}
-
-                                            <button
-                                                type="button"
-                                                className="delete"
-                                                onClick={() =>
-                                                    deleteUser(
-                                                        u._id
-                                                    )
-                                                }
-                                            >
-                                                Delete
-                                            </button>
-
-                                        </div>
-
-                                    ) : (
-
-                                        <span
-                                            className="admin-protected"
-                                        >
-                                            Protected
-                                        </span>
-
-                                    )}
-
-                                </td>
-
-                            </tr>
-
-                        ))
+                        )
+                      )
 
                     ) : (
 
-                        <tr>
+                      <tr>
 
-                            <td
-                                colSpan="5"
-                                style={{
-                                    textAlign: "center",
-                                    padding: "30px",
-                                }}
-                            >
-                                No users found.
-                            </td>
+                        <td
+                          colSpan="5"
+                          style={{
+                            textAlign:
+                              "center",
+                            padding:
+                              "30px",
+                          }}
+                        >
+                          No users found.
+                        </td>
 
-                        </tr>
+                      </tr>
 
                     )}
 
-                </tbody>
+                  </tbody>
 
-            </table>
+                </table>
+
+              )}
+
+          </div>
 
         )}
 
-    </div>
-
-)}
       </main>
 
     </div>

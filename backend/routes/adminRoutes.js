@@ -1,39 +1,22 @@
-// const express = require("express");
 
-// const router = express.Router();
-
-// const {
-//     getAllUsers,
-//     deleteUser
-// } = require("../controllers/adminController");
-
-// const authMiddleware = require("../middleware/authMiddleware");
-// const adminMiddleware = require("../middleware/adminMiddleware");
-
-// router.get(
-//     "/users",
-//     authMiddleware,
-//     adminMiddleware,
-//     getAllUsers
-// );
-
-// router.delete(
-//     "/users/:id",
-//     authMiddleware,
-//     adminMiddleware,
-//     deleteUser
-// );
-
-// module.exports = router;
 
 const express = require("express");
 const router = express.Router();
 
 const User = require("../models/User");
+const adminOnly = require("../middleware/adminMiddleware");
+
 const authMiddleware = require("../middleware/authMiddleware");
 
+const {
+    deleteApplication
+} = require("../controllers/adminController");
 
+
+// =====================================================
 // GET ALL USERS
+// =====================================================
+
 router.get(
     "/users",
     authMiddleware,
@@ -73,6 +56,7 @@ router.get(
     }
 );
 
+
 // =====================================================
 // ACTIVATE / DEACTIVATE USER
 // =====================================================
@@ -81,6 +65,7 @@ router.patch(
     "/users/:id/status",
     authMiddleware,
     async (req, res) => {
+
         try {
 
             console.log("STATUS ROUTE HIT");
@@ -104,7 +89,9 @@ router.patch(
                 });
             }
 
-            const user = await User.findById(req.params.id);
+            const user = await User.findById(
+                req.params.id
+            );
 
             if (!user) {
                 return res.status(404).json({
@@ -127,6 +114,7 @@ router.patch(
 
             res.status(200).json({
                 success: true,
+
                 message: isActive
                     ? "User activated successfully"
                     : "User deactivated successfully",
@@ -155,5 +143,55 @@ router.patch(
         }
     }
 );
+
+
+// // =====================================================
+// // DELETE APPLICATION
+// // =====================================================
+
+// router.delete(
+//     "/applications/:id",
+//     authMiddleware,
+//     async (req, res) => {
+
+//         try {
+
+//             // Admin only
+//             if (!req.user || req.user.role !== "admin") {
+//                 return res.status(403).json({
+//                     success: false,
+//                     message: "Access denied. Admins only."
+//                 });
+//             }
+
+//             // Call controller
+//             return deleteApplication(req, res);
+
+//         } catch (error) {
+
+//             console.error(
+//                 "Delete Application Route Error:",
+//                 error
+//             );
+
+//             res.status(500).json({
+//                 success: false,
+//                 message: "Failed to delete application"
+//             });
+//         }
+//     }
+// );
+
+// =====================================================
+// DELETE APPLICATION
+// =====================================================
+
+router.delete(
+    "/applications/:id",
+    authMiddleware,
+    adminOnly,
+    deleteApplication
+);
+
 
 module.exports = router;

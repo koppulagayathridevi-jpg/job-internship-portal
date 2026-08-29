@@ -3,10 +3,18 @@
 const express = require("express");
 const router = express.Router();
 
+const path = require("path");
+const fs = require("fs");
+
+
+
 const Application = require("../models/Application");
 const Job = require("../models/Job");
 
 const authMiddleware = require("../middleware/authMiddleware");
+const uploadResume = require("../middleware/uploadResume");
+
+
 
 
 // =====================================================
@@ -544,6 +552,666 @@ router.delete("/:id", authMiddleware, async (req, res) => {
   }
 
 });
+
+// =====================================================
+// POST - UPLOAD RESUME FOR APPLICATION
+// =====================================================
+
+router.patch(
+  "/:id/resume",
+  authMiddleware,
+  uploadResume.single("resume"),
+  async (req, res) => {
+    try {
+      console.log("========== RESUME UPLOAD ==========");
+      console.log("Application ID:", req.params.id);
+      console.log("User:", req.user);
+      console.log("File:", req.file);
+
+      // Resume required
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "Please upload a resume"
+        });
+      }
+
+      // Find application
+      const application = await Application.findById(
+        req.params.id
+      );
+
+      if (!application) {
+        return res.status(404).json({
+          success: false,
+          message: "Application not found"
+        });
+      }
+
+      // Candidate can update only own application
+      if (
+        req.user.role !== "admin" &&
+        application.candidate.toString() !==
+          req.user.id.toString()
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied"
+        });
+      }
+
+      // Save resume information
+      application.resume = req.file.filename;
+      application.resumeOriginalName = req.file.originalname;
+
+      await application.save();
+
+      res.status(200).json({
+        success: true,
+        message: "Resume uploaded successfully",
+        application
+      });
+
+    } catch (error) {
+      console.error(
+        "Resume Upload Error:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message: "Failed to upload resume",
+        error: error.message
+      });
+    }
+  }
+);
+
+// =====================================================
+// GET - VIEW / DOWNLOAD RESUME
+// ADMIN + APPLICATION OWNER
+// =====================================================
+
+// const path = require("path");
+// const fs = require("fs");
+
+router.get(
+  "/:id/resume",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      console.log("========== RESUME ACCESS ==========");
+      console.log("Application ID:", req.params.id);
+      console.log("User:", req.user);
+
+      // Find application
+      const application =
+        await Application.findById(req.params.id);
+
+      if (!application) {
+        return res.status(404).json({
+          success: false,
+          message: "Application not found",
+        });
+      }
+
+      // ============================================
+      // AUTHORIZATION
+      // ============================================
+
+      if (
+        req.user.role !== "admin" &&
+        application.candidate.toString() !==
+          req.user.id.toString()
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied",
+        });
+      }
+
+      // ============================================
+      // CHECK RESUME
+      // ============================================
+
+      if (!application.resume) {
+        return res.status(404).json({
+          success: false,
+          message: "Resume not uploaded",
+        });
+      }
+
+      // ============================================
+      // RESUME PATH
+      // ============================================
+
+      const resumePath = path.join(
+        __dirname,
+        "../uploads/resumes",
+        application.resume
+      );
+
+      console.log(
+        "Resume Path:",
+        resumePath
+      );
+
+      // ============================================
+      // CHECK FILE EXISTS
+      // ============================================
+
+      if (!fs.existsSync(resumePath)) {
+        console.error(
+          "Resume file not found:",
+          resumePath
+        );
+
+        return res.status(404).json({
+          success: false,
+          message: "Resume file not found on server",
+        });
+      }
+
+      // ============================================
+      // VIEW OR DOWNLOAD
+      // ============================================
+
+      const download =
+        req.query.download === "true";
+
+      if (download) {
+        return res.download(
+          resumePath,
+          application.resumeOriginalName ||
+            application.resume
+        );
+      }
+
+      // View resume in browser
+      return res.sendFile(
+        resumePath
+      );
+
+    } catch (error) {
+      console.error(
+        "Resume Access Error:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to access resume",
+        error: error.message,
+      });
+    }
+  }
+);
+// =====================================================
+// GET - VIEW / DOWNLOAD RESUME
+// =====================================================
+
+router.get(
+  "/:id/resume",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      console.log("========== RESUME ACCESS ==========");
+      console.log("Application ID:", req.params.id);
+      console.log("User:", req.user);
+
+      // -----------------------------------------
+      // Find application
+      // -----------------------------------------
+
+      const application =
+        await Application.findById(req.params.id);
+
+      if (!application) {
+        return res.status(404).json({
+          success: false,
+          message: "Application not found",
+        });
+      }
+
+      // -----------------------------------------
+      // Admin can access any resume
+      // Candidate can access only own resume
+      // -----------------------------------------
+
+      if (
+        req.user.role !== "admin" &&
+        application.candidate.toString() !==
+          req.user.id.toString()
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied",
+        });
+      }
+
+      // -----------------------------------------
+      // Check resume exists
+      // -----------------------------------------
+
+      if (!application.resume) {
+        return res.status(404).json({
+          success: false,
+          message: "Resume not uploaded",
+        });
+      }
+
+      // -----------------------------------------
+      // Resume path
+      // -----------------------------------------
+
+      const path = require("path");
+      const fs = require("fs");
+
+      const resumePath = path.join(
+        __dirname,
+        "..",
+        "uploads",
+        "resumes",
+        application.resume
+      );
+
+      console.log(
+        "Resume Path:",
+        resumePath
+      );
+
+      // -----------------------------------------
+      // Check file exists
+      // -----------------------------------------
+
+      if (!fs.existsSync(resumePath)) {
+        console.error(
+          "Resume file does not exist:",
+          resumePath
+        );
+
+        return res.status(404).json({
+          success: false,
+          message: "Resume file not found on server",
+        });
+      }
+
+      // -----------------------------------------
+      // Send resume
+      // -----------------------------------------
+
+      const originalName =
+        application.resumeOriginalName ||
+        application.resume;
+
+      res.setHeader(
+        "Content-Disposition",
+        `inline; filename="${originalName}"`
+      );
+
+      res.sendFile(resumePath);
+
+    } catch (error) {
+
+      console.error(
+        "Resume Access Error:",
+        error
+      );
+
+      res.status(500).json({
+        success: false,
+        message: "Failed to access resume",
+        error: error.message,
+      });
+    }
+  }
+);
+
+
+// // =====================================================
+// // GET - VIEW RESUME
+// // =====================================================
+
+// router.get(
+//     "/:id/resume/view",
+//     authMiddleware,
+//     async (req, res) => {
+
+//         try {
+
+//             const application =
+//                 await Application.findById(
+//                     req.params.id
+//                 );
+
+//             if (!application) {
+
+//                 return res.status(404).json({
+//                     success: false,
+//                     message: "Application not found"
+//                 });
+
+//             }
+
+//             // Candidate can only access own resume
+//             if (
+//                 req.user.role !== "admin" &&
+//                 application.candidate.toString() !==
+//                 req.user.id.toString()
+//             ) {
+
+//                 return res.status(403).json({
+//                     success: false,
+//                     message: "Access denied"
+//                 });
+
+//             }
+
+//             // Resume does not exist
+//             if (!application.resume) {
+
+//                 return res.status(404).json({
+//                     success: false,
+//                     message: "Resume not found"
+//                 });
+
+//             }
+
+//             const resumePath = path.join(
+//                 __dirname,
+//                 "../uploads/resumes",
+//                 application.resume
+//             );
+
+//             console.log(
+//                 "Resume View Path:",
+//                 resumePath
+//             );
+
+//             if (!fs.existsSync(resumePath)) {
+
+//                 console.log(
+//                     "Resume file does not exist:",
+//                     resumePath
+//                 );
+
+//                 return res.status(404).json({
+//                     success: false,
+//                     message: "Resume file not found on server"
+//                 });
+
+//             }
+
+//             // Open inside browser
+//             res.setHeader(
+//                 "Content-Disposition",
+//                 "inline"
+//             );
+
+//             res.sendFile(
+//                 path.resolve(resumePath)
+//             );
+
+//         } catch (error) {
+
+//             console.error(
+//                 "View Resume Error:",
+//                 error
+//             );
+
+//             res.status(500).json({
+//                 success: false,
+//                 message: "Failed to access resume",
+//                 error: error.message
+//             });
+
+//         }
+
+//     }
+// );
+
+// // =====================================================
+// // GET - DOWNLOAD RESUME
+// // =====================================================
+
+// router.get(
+//     "/:id/resume/download",
+//     authMiddleware,
+//     async (req, res) => {
+
+//         try {
+
+//             const application =
+//                 await Application.findById(
+//                     req.params.id
+//                 );
+
+//             if (!application) {
+
+//                 return res.status(404).json({
+//                     success: false,
+//                     message: "Application not found"
+//                 });
+
+//             }
+
+//             // Candidate can only download own resume
+//             if (
+//                 req.user.role !== "admin" &&
+//                 application.candidate.toString() !==
+//                 req.user.id.toString()
+//             ) {
+
+//                 return res.status(403).json({
+//                     success: false,
+//                     message: "Access denied"
+//                 });
+
+//             }
+
+//             if (!application.resume) {
+
+//                 return res.status(404).json({
+//                     success: false,
+//                     message: "Resume not found"
+//                 });
+
+//             }
+
+//             const resumePath = path.join(
+//                 __dirname,
+//                 "../uploads/resumes",
+//                 application.resume
+//             );
+
+//             console.log(
+//                 "Resume Download Path:",
+//                 resumePath
+//             );
+
+//             if (!fs.existsSync(resumePath)) {
+
+//                 return res.status(404).json({
+//                     success: false,
+//                     message: "Resume file not found on server"
+//                 });
+
+//             }
+
+//             const downloadName =
+//                 application.resumeOriginalName ||
+//                 application.resume;
+
+//             res.download(
+//                 path.resolve(resumePath),
+//                 downloadName
+//             );
+
+//         } catch (error) {
+
+//             console.error(
+//                 "Download Resume Error:",
+//                 error
+//             );
+
+//             res.status(500).json({
+//                 success: false,
+//                 message: "Failed to download resume",
+//                 error: error.message
+//             });
+
+//         }
+
+//     }
+// );
+
+// =====================================================
+// GET - VIEW / DOWNLOAD RESUME
+// =====================================================
+
+router.get(
+  "/:id/resume",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      console.log("========== RESUME ACCESS ==========");
+      console.log("Application ID:", req.params.id);
+      console.log("User:", req.user);
+
+      // -----------------------------------------
+      // Find application
+      // -----------------------------------------
+
+      const application = await Application.findById(
+        req.params.id
+      );
+
+      if (!application) {
+        return res.status(404).json({
+          success: false,
+          message: "Application not found"
+        });
+      }
+
+      // -----------------------------------------
+      // Resume exists?
+      // -----------------------------------------
+
+      if (!application.resume) {
+        return res.status(404).json({
+          success: false,
+          message: "Resume not found for this application"
+        });
+      }
+
+      // -----------------------------------------
+      // Admin OR application owner
+      // -----------------------------------------
+
+      if (
+        req.user.role !== "admin" &&
+        application.candidate.toString() !==
+          req.user.id.toString()
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied"
+        });
+      }
+
+      // -----------------------------------------
+      // Resume file path
+      // -----------------------------------------
+
+      const resumePath = path.join(
+        __dirname,
+        "..",
+        "uploads",
+        "resumes",
+        application.resume
+      );
+
+      console.log(
+        "Resume file path:",
+        resumePath
+      );
+
+      // -----------------------------------------
+      // Check file exists
+      // -----------------------------------------
+
+      if (!fs.existsSync(resumePath)) {
+        console.error(
+          "Resume file does not exist:",
+          resumePath
+        );
+
+        return res.status(404).json({
+          success: false,
+          message: "Resume file not found on server"
+        });
+      }
+
+      // -----------------------------------------
+      // Determine view/download
+      // -----------------------------------------
+
+      const download =
+        req.query.download === "true";
+
+      // -----------------------------------------
+      // Set PDF content type
+      // -----------------------------------------
+
+      res.setHeader(
+        "Content-Type",
+        "application/pdf"
+      );
+
+      // -----------------------------------------
+      // VIEW
+      // -----------------------------------------
+
+      if (!download) {
+        res.setHeader(
+          "Content-Disposition",
+          `inline; filename="${application.resumeOriginalName || application.resume}"`
+        );
+      }
+
+      // -----------------------------------------
+      // DOWNLOAD
+      // -----------------------------------------
+
+      if (download) {
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="${application.resumeOriginalName || application.resume}"`
+        );
+      }
+
+      // -----------------------------------------
+      // Send file
+      // -----------------------------------------
+
+      return res.sendFile(
+        resumePath
+      );
+
+    } catch (error) {
+      console.error(
+        "Resume Access Error:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to access resume",
+        error: error.message
+      });
+    }
+  }
+);
 
 
 module.exports = router;

@@ -9,6 +9,8 @@ import Register from "./pages/Register";
 import Jobs from "./pages/Jobs";
 import JobDetails from "./pages/JobDetails";
 import CandidateDashboard from "./pages/CandidateDashboard";
+import ApplicationsPage from "./pages/ApplicationsPage";
+import MyProfile from "./pages/MyProfile";
 import AdminDashboard from "./pages/AdminDashboard";
 
 
@@ -63,6 +65,15 @@ function AppContent() {
                         path="/candidate-dashboard"
                         element={<CandidateDashboard />}
                     />
+                    <Route
+                    path="/applications"
+                    element={<ApplicationsPage />}
+                />
+                <Route
+    path="/profile"
+    element={<MyProfile />}
+/>
+
 
                     <Route
                         path="/admin-dashboard"

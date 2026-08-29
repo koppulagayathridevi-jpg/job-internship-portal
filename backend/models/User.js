@@ -1,19 +1,122 @@
+// // const mongoose = require("mongoose");
+
+// // const userSchema = new mongoose.Schema(
+// //     {
+// //         name: {
+// //             type: String,
+// //             required: true,
+// //             trim: true
+// //         },
+
+// //         email: {
+// //             type: String,
+// //             required: true,
+// //             unique: true,
+// //             lowercase: true,
+// //             trim: true
+// //         },
+
+// //         password: {
+// //             type: String,
+// //             required: true
+// //         },
+
+// //         role: {
+// //             type: String,
+// //             enum: ["candidate", "admin"],
+// //             default: "candidate"
+// //         },
+
+// //         isActive: {
+// //             type: Boolean,
+// //             default: true
+// //         }
+// //     },
+// //     {
+// //         timestamps: true
+// //     }
+// // );
+
+// // module.exports = mongoose.model("User", userSchema);
+
+// const mongoose = require("mongoose");
+
+// const userSchema = new mongoose.Schema(
+//     {
+//         name: {
+//             type: String,
+//             required: true,
+//             trim: true
+//         },
+
+//         email: {
+//             type: String,
+//             required: true,
+//             unique: true,
+//             lowercase: true,
+//             trim: true
+//         },
+
+//         password: {
+//             type: String,
+//             required: true
+//         },
+
+//         role: {
+//             type: String,
+//             enum: ["candidate", "admin"],
+//             default: "candidate"
+//         },
+
+//         isActive: {
+//             type: Boolean,
+//             default: true
+//         },
+
+//         phone: {
+//             type: String,
+//             default: ""
+//         },
+
+//         location: {
+//             type: String,
+//             default: ""
+//         },
+
+//         education: {
+//             type: String,
+//             default: ""
+//         },
+
+//         skills: {
+//             type: String,
+//             default: ""
+//         }
+//     },
+
+//     {
+//         timestamps: true
+//     }
+// );
+
+// module.exports = mongoose.model(
+//     "User",
+//     userSchema
+// );
+
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
     {
         name: {
             type: String,
-            required: true,
-            trim: true
+            required: true
         },
 
         email: {
             type: String,
             required: true,
-            unique: true,
-            lowercase: true,
-            trim: true
+            unique: true
         },
 
         password: {
@@ -30,6 +133,26 @@ const userSchema = new mongoose.Schema(
         isActive: {
             type: Boolean,
             default: true
+        },
+
+        phone: {
+            type: String,
+            default: ""
+        },
+
+        location: {
+            type: String,
+            default: ""
+        },
+
+        education: {
+            type: String,
+            default: ""
+        },
+
+        skills: {
+            type: String,
+            default: ""
         }
     },
     {

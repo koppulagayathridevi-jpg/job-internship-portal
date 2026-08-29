@@ -1,0 +1,424 @@
+/* =====================================================
+   APPLICATIONS PAGE
+===================================================== */
+
+.applications-page {
+    min-height: 100vh;
+    background: #f5f7fb;
+    padding: 35px 50px;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.applications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.applications-header h1 {
+    margin: 8px 0;
+    font-size: 32px;
+    color: #172033;
+}
+
+.applications-header p {
+    margin: 0;
+    color: #6b7280;
+}
+
+
+.applications-back-link {
+    color: #64748b;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.applications-back-link:hover {
+    color: #334155;
+}
+
+
+/* =====================================================
+   BROWSE BUTTON
+===================================================== */
+
+.applications-browse-button {
+    display: inline-block;
+    padding: 12px 20px;
+    background: #1e3a8a;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+.applications-browse-button:hover {
+    background: #172554;
+}
+
+
+/* =====================================================
+   SUMMARY
+===================================================== */
+
+.applications-summary {
+    background: white;
+    border-radius: 14px;
+    padding: 22px 25px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    width: 280px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.applications-summary-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: #e8efff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.applications-summary span {
+    display: block;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.applications-summary strong {
+    display: block;
+    margin-top: 3px;
+    font-size: 26px;
+    color: #172033;
+}
+
+
+/* =====================================================
+   APPLICATION LIST
+===================================================== */
+
+.applications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+
+/* =====================================================
+   APPLICATION CARD
+===================================================== */
+
+.application-card {
+    background: white;
+    border-radius: 14px;
+    padding: 25px;
+    display: grid;
+    grid-template-columns: 65px 1fr 170px 220px;
+    gap: 25px;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+}
+
+
+/* =====================================================
+   JOB ICON
+===================================================== */
+
+.application-job-icon {
+    width: 60px;
+    height: 60px;
+    background: #eef2ff;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+}
+
+
+/* =====================================================
+   JOB DETAILS
+===================================================== */
+
+.application-job-details h2 {
+    margin: 0 0 5px;
+    font-size: 20px;
+    color: #172033;
+}
+
+.application-job-details h3 {
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.application-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.application-date {
+    margin-top: 12px;
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.application-date strong {
+    color: #475569;
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.application-status-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.application-status-label {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 7px;
+}
+
+.application-status-section strong {
+    padding: 7px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+
+/* STATUS COLORS */
+
+.application-status-pending {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.application-status-shortlisted {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.application-status-rejected {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.application-status-accepted {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+
+/* =====================================================
+   RESUME
+===================================================== */
+
+.application-resume-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.application-resume-label {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 5px;
+}
+
+.resume-uploaded {
+    color: #047857;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 9px;
+}
+
+.resume-not-uploaded {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+
+.resume-buttons {
+    display: flex;
+    gap: 7px;
+}
+
+
+.resume-buttons button {
+    border: none;
+    padding: 8px 11px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+.resume-view-button {
+    background: #eef2ff;
+    color: #3730a3;
+}
+
+.resume-view-button:hover {
+    background: #e0e7ff;
+}
+
+
+.resume-download-button {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.resume-download-button:hover {
+    background: #d1fae5;
+}
+
+
+/* =====================================================
+   EMPTY
+===================================================== */
+
+.applications-empty {
+    background: white;
+    padding: 70px 30px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.applications-empty-icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+}
+
+.applications-empty h2 {
+    color: #172033;
+}
+
+.applications-empty p {
+    color: #64748b;
+    margin-bottom: 25px;
+}
+
+
+/* =====================================================
+   LOADING
+===================================================== */
+
+.applications-loading {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.applications-loading-icon {
+    font-size: 45px;
+}
+
+.applications-loading h2 {
+    color: #172033;
+}
+
+.applications-loading p {
+    color: #64748b;
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.applications-error {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.applications-error-icon {
+    font-size: 45px;
+}
+
+.applications-error h2 {
+    color: #b91c1c;
+}
+
+.applications-error p {
+    color: #64748b;
+    margin-bottom: 20px;
+}
+
+.applications-back-button {
+    padding: 11px 18px;
+    background: #1e3a8a;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1100px) {
+
+    .application-card {
+        grid-template-columns: 60px 1fr 160px;
+    }
+
+    .application-resume-section {
+        grid-column: 2 / -1;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .applications-page {
+        padding: 25px 15px;
+    }
+
+    .applications-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .application-card {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .application-resume-section {
+        grid-column: auto;
+    }
+
+}
