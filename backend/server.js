@@ -147,8 +147,7 @@ app.use(
     cors({
         origin: function (origin, callback) {
 
-            // Allow requests without an origin
-            // such as Postman or server-to-server requests
+            // Allow Postman and requests without an origin
             if (!origin) {
                 return callback(null, true);
             }
@@ -157,7 +156,7 @@ app.use(
                 return callback(null, true);
             }
 
-            console.log("Blocked by CORS:", origin);
+            console.log("Blocked CORS origin:", origin);
 
             return callback(
                 new Error("Not allowed by CORS")
@@ -183,20 +182,16 @@ app.use(
 );
 
 // =====================================================
-// HANDLE PREFLIGHT REQUESTS
-// =====================================================
-
-app.options("*", cors());
-
-// =====================================================
 // BODY PARSER
 // =====================================================
 
 app.use(express.json());
 
-app.use(express.urlencoded({
-    extended: true
-}));
+app.use(
+    express.urlencoded({
+        extended: true
+    })
+);
 
 // =====================================================
 // UPLOADS
