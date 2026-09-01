@@ -1,3 +1,6 @@
+
+
+
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/admin-dashboard.css";
@@ -16,12 +19,158 @@ const API_URL = "https://job-internship-portal-o55b.onrender.com";
 
 function AdminDashboard() {
   const navigate = useNavigate();
+  // =====================================================
+  // ADMIN AUTHENTICATION
+  // =====================================================
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
+
+    // No active login
+    if (!token || !userData) {
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    try {
+      const user = JSON.parse(userData);
+
+      // Candidate is never allowed to enter admin dashboard
+      if (user.role === "candidate") {
+        navigate("/candidate-dashboard", { replace: true });
+        return;
+      }
+
+      // Any unknown role is rejected
+      if (user.role !== "admin") {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("adminLoggedIn");
+
+        navigate("/login", { replace: true });
+      }
+    } catch (error) {
+      console.error("Invalid authentication data:", error);
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("adminLoggedIn");
+
+      navigate("/login", { replace: true });
+    }
+  }, [navigate]);
+
+
+
 
   // =====================================================
   // PAGE
   // =====================================================
 
-  const [page, setPage] = useState("dashboard");
+  const getInitialPage = () => {
+    const savedPage = window.history.state?.adminPage;
+
+    const validPages = [
+      "dashboard",
+      "selected",
+      "companies",
+      "jobs",
+      "applications",
+      "users",
+    ];
+
+    return validPages.includes(savedPage)
+      ? savedPage
+      : "dashboard";
+  };
+
+  const [page, setPage] = useState(getInitialPage);
+
+  // Keep dashboard sections in browser history.
+  // This makes browser Back work inside the admin dashboard
+  // instead of unexpectedly returning to Login/Home.
+  useEffect(() => {
+    const currentState = window.history.state || {};
+
+    window.history.replaceState(
+      {
+        ...currentState,
+        adminPage: page,
+      },
+      "",
+      window.location.href
+    );
+
+    const handlePopState = (event) => {
+      const previousPage = event.state?.adminPage;
+
+      const validPages = [
+        "dashboard",
+        "selected",
+        "companies",
+        "jobs",
+        "applications",
+        "users",
+      ];
+
+      if (validPages.includes(previousPage)) {
+        setPage(previousPage);
+      } else {
+        // If browser history came from outside the dashboard,
+        // stay safely on the dashboard.
+        setPage("dashboard");
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  const changePage = (newPage) => {
+    const validPages = [
+      "dashboard",
+      "selected",
+      "companies",
+      "jobs",
+      "applications",
+      "users",
+    ];
+
+    if (!validPages.includes(newPage)) {
+      return;
+    }
+
+    if (newPage === page) {
+      return;
+    }
+
+    window.history.pushState(
+      {
+        ...(window.history.state || {}),
+        adminPage: newPage,
+      },
+      "",
+      window.location.href
+    );
+
+    setPage(newPage);
+  };
+
+  const goBackToDashboard = () => {
+    if (page === "dashboard") {
+      return;
+    }
+
+    // Because each dashboard section creates a history entry,
+    // browser Back returns to the previous admin section/dashboard.
+    window.history.back();
+  };
 
   // =====================================================
   // COMPANIES
@@ -191,69 +340,255 @@ const getResumeUrl = (application) => {
 // =====================================================
 // VIEW RESUME
 // Opens PDF in browser without downloading
+// const viewResume = async (application) => {
+
+//     console.log("========== VIEW RESUME ==========");
+//     console.log("Application:", application);
+//     console.log("Resume:", application?.resume);
+
+//     const resumeUrl = getResumeUrl(application);
+
+//     console.log("Resume URL:", resumeUrl);
+
+//     if (!resumeUrl) {
+//         alert("Resume is not available.");
+//         return;
+//     }
+
+//     try {
+
+//         const response = await fetch(resumeUrl);
+
+//         console.log(
+//             "Resume response status:",
+//             response.status
+//         );
+
+//         if (!response.ok) {
+//             throw new Error(
+//                 `Resume file not found. HTTP ${response.status}`
+//             );
+//         }
+
+//         const blob = await response.blob();
+
+//         console.log(
+//             "Resume Blob:",
+//             blob
+//         );
+
+//         // Create temporary URL for the PDF
+//         const blobUrl =
+//             window.URL.createObjectURL(blob);
+
+//         // Open PDF in a new tab
+//         const newTab = window.open(
+//             "",
+//             "_blank"
+//         );
+
+//         if (!newTab) {
+//             alert(
+//                 "Please allow pop-ups in your browser to view the resume."
+//             );
+
+//             window.URL.revokeObjectURL(blobUrl);
+//             return;
+//         }
+
+//         // Navigate new tab to PDF
+//         newTab.location.href = blobUrl;
+
+//         // Release URL after browser has loaded it
+//         setTimeout(() => {
+//             window.URL.revokeObjectURL(blobUrl);
+//         }, 60000);
+
+//     } catch (error) {
+
+//         console.error(
+//             "View Resume Error:",
+//             error
+//         );
+
+//         alert(
+//             error.message ||
+//             "Failed to view resume."
+//         );
+//     }
+// };
+   
 const viewResume = async (application) => {
-
-    console.log("========== VIEW RESUME ==========");
-    console.log("Application:", application);
-    console.log("Resume:", application?.resume);
-
-    const resumeUrl = getResumeUrl(application);
-
-    console.log("Resume URL:", resumeUrl);
-
-    if (!resumeUrl) {
-        alert("Resume is not available.");
-        return;
-    }
 
     try {
 
-        const response = await fetch(resumeUrl);
+        console.log(
+            "========== VIEW RESUME =========="
+        );
+
+        console.log(
+            "Application:",
+            application
+        );
+
+        console.log(
+            "Resume:",
+            application.resume
+        );
+
+
+        // -----------------------------------------
+        // CHECK RESUME
+        // -----------------------------------------
+
+        if (!application.resume) {
+
+            alert(
+                "Resume has not been uploaded for this application."
+            );
+
+            return;
+        }
+
+
+        // -----------------------------------------
+        // CHECK APPLICATION ID
+        // -----------------------------------------
+
+        if (!application._id) {
+
+            alert(
+                "Application ID is missing."
+            );
+
+            return;
+        }
+
+
+        // -----------------------------------------
+        // TOKEN
+        // -----------------------------------------
+
+        const token =
+            localStorage.getItem("token");
+
+
+        if (!token) {
+
+            alert(
+                "Please login again."
+            );
+
+            return;
+        }
+
+
+        // -----------------------------------------
+        // CORRECT RESUME API
+        // -----------------------------------------
+
+        const resumeUrl =
+            `https://job-internship-portal-o55b.onrender.com/api/applications/${application._id}/resume`;
+
+
+        console.log(
+            "Protected Resume URL:",
+            resumeUrl
+        );
+
+
+        // -----------------------------------------
+        // FETCH RESUME
+        // -----------------------------------------
+
+        const response =
+            await fetch(
+                resumeUrl,
+                {
+                    method: "GET",
+
+                    headers: {
+                        Authorization:
+                            `Bearer ${token}`
+                    }
+                }
+            );
+
 
         console.log(
             "Resume response status:",
             response.status
         );
 
+
+        // -----------------------------------------
+        // ERROR
+        // -----------------------------------------
+
         if (!response.ok) {
+
+            let errorMessage =
+                "Unable to open resume.";
+
+            try {
+
+                const errorData =
+                    await response.json();
+
+                errorMessage =
+                    errorData.message ||
+                    errorMessage;
+
+            } catch {
+                // Response may not be JSON
+            }
+
             throw new Error(
-                `Resume file not found. HTTP ${response.status}`
+                `${errorMessage} HTTP ${response.status}`
             );
         }
 
-        const blob = await response.blob();
 
-        console.log(
-            "Resume Blob:",
-            blob
-        );
+        // -----------------------------------------
+        // GET PDF BLOB
+        // -----------------------------------------
 
-        // Create temporary URL for the PDF
+        const blob =
+            await response.blob();
+
+
+        // -----------------------------------------
+        // CREATE TEMP URL
+        // -----------------------------------------
+
         const blobUrl =
-            window.URL.createObjectURL(blob);
+            window.URL.createObjectURL(
+                blob
+            );
 
-        // Open PDF in a new tab
-        const newTab = window.open(
-            "",
+
+        // -----------------------------------------
+        // OPEN PDF
+        // -----------------------------------------
+
+        window.open(
+            blobUrl,
             "_blank"
         );
 
-        if (!newTab) {
-            alert(
-                "Please allow pop-ups in your browser to view the resume."
+
+        // -----------------------------------------
+        // CLEANUP
+        // -----------------------------------------
+
+        setTimeout(() => {
+
+            window.URL.revokeObjectURL(
+                blobUrl
             );
 
-            window.URL.revokeObjectURL(blobUrl);
-            return;
-        }
-
-        // Navigate new tab to PDF
-        newTab.location.href = blobUrl;
-
-        // Release URL after browser has loaded it
-        setTimeout(() => {
-            window.URL.revokeObjectURL(blobUrl);
         }, 60000);
+
 
     } catch (error) {
 
@@ -268,57 +603,247 @@ const viewResume = async (application) => {
         );
     }
 };
-   
 ////download
+//const downloadResume = async (application) => {
+
+//     console.log("========== DOWNLOAD RESUME ==========");
+
+//     const resumeUrl = getResumeUrl(application);
+
+//     console.log("Resume URL:", resumeUrl);
+
+//     if (!resumeUrl) {
+//         alert("Resume is not available.");
+//         return;
+//     }
+
+//     try {
+
+//         const response = await fetch(resumeUrl);
+
+//         console.log(
+//             "Resume response status:",
+//             response.status
+//         );
+
+//         if (!response.ok) {
+//             throw new Error(
+//                 `Resume file not found. HTTP ${response.status}`
+//             );
+//         }
+
+//         const blob = await response.blob();
+
+//         const blobUrl =
+//             window.URL.createObjectURL(blob);
+
+//         const link =
+//             document.createElement("a");
+
+//         link.href = blobUrl;
+
+//         link.download =
+//             application.resumeOriginalName ||
+//             "resume.pdf";
+
+//         document.body.appendChild(link);
+
+//         link.click();
+
+//         document.body.removeChild(link);
+
+//         window.URL.revokeObjectURL(blobUrl);
+
+//     } catch (error) {
+
+//         console.error(
+//             "Download Resume Error:",
+//             error
+//         );
+
+//         alert(
+//             "Failed to download resume."
+//         );
+//     }
+// };
+
 const downloadResume = async (application) => {
-
-    console.log("========== DOWNLOAD RESUME ==========");
-
-    const resumeUrl = getResumeUrl(application);
-
-    console.log("Resume URL:", resumeUrl);
-
-    if (!resumeUrl) {
-        alert("Resume is not available.");
-        return;
-    }
 
     try {
 
-        const response = await fetch(resumeUrl);
+        console.log(
+            "========== DOWNLOAD RESUME =========="
+        );
 
         console.log(
-            "Resume response status:",
+            "Application:",
+            application
+        );
+
+
+        // -----------------------------------------
+        // CHECK RESUME
+        // -----------------------------------------
+
+        if (!application.resume) {
+
+            alert(
+                "Resume has not been uploaded."
+            );
+
+            return;
+        }
+
+
+        // -----------------------------------------
+        // CHECK APPLICATION ID
+        // -----------------------------------------
+
+        if (!application._id) {
+
+            alert(
+                "Application ID is missing."
+            );
+
+            return;
+        }
+
+
+        // -----------------------------------------
+        // TOKEN
+        // -----------------------------------------
+
+        const token =
+            localStorage.getItem("token");
+
+
+        if (!token) {
+
+            alert(
+                "Please login again."
+            );
+
+            return;
+        }
+
+
+        // -----------------------------------------
+        // DOWNLOAD URL
+        // -----------------------------------------
+
+        const downloadUrl =
+            `https://job-internship-portal-o55b.onrender.com/api/applications/${application._id}/resume?download=true`;
+
+
+        console.log(
+            "Protected Download URL:",
+            downloadUrl
+        );
+
+
+        // -----------------------------------------
+        // FETCH
+        // -----------------------------------------
+
+        const response =
+            await fetch(
+                downloadUrl,
+                {
+                    method: "GET",
+
+                    headers: {
+                        Authorization:
+                            `Bearer ${token}`
+                    }
+                }
+            );
+
+
+        console.log(
+            "Download response status:",
             response.status
         );
 
+
+        // -----------------------------------------
+        // ERROR
+        // -----------------------------------------
+
         if (!response.ok) {
+
+            let errorMessage =
+                "Unable to download resume.";
+
+            try {
+
+                const errorData =
+                    await response.json();
+
+                errorMessage =
+                    errorData.message ||
+                    errorMessage;
+
+            } catch {
+                // Response may not be JSON
+            }
+
             throw new Error(
-                `Resume file not found. HTTP ${response.status}`
+                `${errorMessage} HTTP ${response.status}`
             );
         }
 
-        const blob = await response.blob();
+
+        // -----------------------------------------
+        // BLOB
+        // -----------------------------------------
+
+        const blob =
+            await response.blob();
+
+
+        // -----------------------------------------
+        // TEMP URL
+        // -----------------------------------------
 
         const blobUrl =
-            window.URL.createObjectURL(blob);
+            window.URL.createObjectURL(
+                blob
+            );
+
+
+        // -----------------------------------------
+        // CREATE DOWNLOAD LINK
+        // -----------------------------------------
 
         const link =
             document.createElement("a");
 
-        link.href = blobUrl;
+        link.href =
+            blobUrl;
 
         link.download =
             application.resumeOriginalName ||
+            application.resume ||
             "resume.pdf";
 
-        document.body.appendChild(link);
+
+        document.body.appendChild(
+            link
+        );
 
         link.click();
 
-        document.body.removeChild(link);
 
-        window.URL.revokeObjectURL(blobUrl);
+        // -----------------------------------------
+        // CLEANUP
+        // -----------------------------------------
+
+        link.remove();
+
+        window.URL.revokeObjectURL(
+            blobUrl
+        );
+
 
     } catch (error) {
 
@@ -328,6 +853,7 @@ const downloadResume = async (application) => {
         );
 
         alert(
+            error.message ||
             "Failed to download resume."
         );
     }
@@ -504,7 +1030,7 @@ const downloadResume = async (application) => {
       deadline: selectedJob.deadline || "",
     });
 
-    setPage("jobs");
+    changePage("jobs");
 
     window.scrollTo({
       top: 0,
@@ -1274,12 +1800,22 @@ const downloadResume = async (application) => {
   // LOGOUT
   // =====================================================
 
-  const logout = () => {
+
+// =====================================================
+// ADMIN LOGOUT
+// =====================================================
+
+const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("adminLoggedIn");
 
-    navigate("/login");
+    navigate("/login", {
+      replace: true,
+    });
   };
+
 
   // =====================================================
   // FETCH DATA WHEN PAGE CHANGES
@@ -1335,7 +1871,7 @@ const downloadResume = async (application) => {
               : ""
           }
           onClick={() =>
-            setPage("dashboard")
+            changePage("dashboard")
           }
         >
           📊 Dashboard
@@ -1348,7 +1884,7 @@ const downloadResume = async (application) => {
               : ""
           }
           onClick={() =>
-            setPage("companies")
+            changePage("companies")
           }
         >
           🏢 Companies
@@ -1361,7 +1897,7 @@ const downloadResume = async (application) => {
               : ""
           }
           onClick={() =>
-            setPage("jobs")
+            changePage("jobs")
           }
         >
           💼 Jobs
@@ -1374,7 +1910,7 @@ const downloadResume = async (application) => {
               : ""
           }
           onClick={() =>
-            setPage("applications")
+            changePage("applications")
           }
         >
           📄 Applications
@@ -1387,7 +1923,7 @@ const downloadResume = async (application) => {
               : ""
           }
           onClick={() =>
-            setPage("users")
+            changePage("users")
           }
         >
           👥 Users
@@ -1434,7 +1970,7 @@ const downloadResume = async (application) => {
             <div className="cards">
 
               <div className="card blue clickable-card"
-              onClick={()=>setPage("selected")}>
+              onClick={()=>changePage("selected")}>
                 <div className="card-icon">
                   ✅
                   
@@ -1453,7 +1989,7 @@ const downloadResume = async (application) => {
 
               <div 
               className="card green clickable-card"
-    onClick={() => setPage("jobs")}
+    onClick={() => changePage("jobs")}
 >
                 <div className="card-icon">
                   💼
@@ -1469,7 +2005,7 @@ const downloadResume = async (application) => {
               </div>
 
               <div className="card orange clickable-card"
-    onClick={() => setPage("applications")}>
+    onClick={() => changePage("applications")}>
                 <div className="card-icon">
                   📄
                 </div>
@@ -1484,7 +2020,7 @@ const downloadResume = async (application) => {
               </div>
 
               <div className="card purple clickable-card"
-    onClick={() => setPage("users")}>
+    onClick={() => changePage("users")}>
                 <div className="card-icon">
                   👥
                 </div>
@@ -1708,7 +2244,7 @@ const downloadResume = async (application) => {
                 <button
                   className="view-all-btn"
                   onClick={() =>
-                    setPage("applications")
+                    changePage("applications")
                   }
                 >
                   View All Applications →
@@ -1741,7 +2277,7 @@ const downloadResume = async (application) => {
 
         <button
           type="button"
-          onClick={() => setPage("dashboard")}
+          onClick={goBackToDashboard}
         >
           ← Back to Dashboard
         </button>
@@ -1981,7 +2517,7 @@ const downloadResume = async (application) => {
                     <button
                       type="button"
                       onClick={() =>
-                        setPage("jobs")
+                        changePage("jobs")
                       }
                     >
                       Go to Jobs

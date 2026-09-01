@@ -49,12 +49,7 @@ function Navbar() {
                             </Link>
                         </li>
 
-                        <li>
-                            <Link to="/jobs" className="job-nav-link">
-                                Jobs
-                            </Link>
-                        </li>
-
+                        
                         <li>
                             <Link to="/login" className="job-nav-link">
                                 Login

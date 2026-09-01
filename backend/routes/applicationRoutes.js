@@ -1,12 +1,8 @@
-
-
 const express = require("express");
 const router = express.Router();
 
 const path = require("path");
 const fs = require("fs");
-
-
 
 const Application = require("../models/Application");
 const Job = require("../models/Job");
@@ -15,106 +11,64 @@ const authMiddleware = require("../middleware/authMiddleware");
 const uploadResume = require("../middleware/uploadResume");
 
 
-
-
 // =====================================================
 // POST - APPLY FOR JOB
 // =====================================================
 
 router.post("/", authMiddleware, async (req, res) => {
+    try {
+        const { jobId } = req.body;
 
-  try {
+        if (!jobId) {
+            return res.status(400).json({
+                success: false,
+                message: "Job ID is required"
+            });
+        }
 
-    const { jobId } = req.body;
+        const job = await Job.findById(jobId);
 
+        if (!job) {
+            return res.status(404).json({
+                success: false,
+                message: "Job not found"
+            });
+        }
 
-    // Check Job ID
-    if (!jobId) {
+        const existingApplication = await Application.findOne({
+            candidate: req.user.id,
+            job: jobId
+        });
 
-      return res.status(400).json({
-        success: false,
-        message: "Job ID is required",
-      });
+        if (existingApplication) {
+            return res.status(400).json({
+                success: false,
+                message: "You have already applied for this job"
+            });
+        }
 
+        const application = await Application.create({
+            candidate: req.user.id,
+            job: jobId,
+            status: "Pending"
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "Application submitted successfully",
+            application
+        });
+
+    } catch (error) {
+        console.error("Application Create Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
     }
-
-
-    // Check whether Job exists
-    const job = await Job.findById(jobId);
-
-    if (!job) {
-
-      return res.status(404).json({
-        success: false,
-        message: "Job not found",
-      });
-
-    }
-
-
-    // Check duplicate application
-    const existingApplication =
-      await Application.findOne({
-        candidate: req.user.id,
-        job: jobId,
-      });
-
-
-    if (existingApplication) {
-
-      return res.status(400).json({
-        success: false,
-        message: "You have already applied for this job",
-      });
-
-    }
-
-
-    // Create application
-    const application =
-      await Application.create({
-
-        candidate: req.user.id,
-
-        job: jobId,
-
-        status: "Pending",
-
-      });
-
-
-    res.status(201).json({
-
-      success: true,
-
-      message: "Application submitted successfully",
-
-      application,
-
-    });
-
-
-  } catch (error) {
-
-    console.error(
-      "Application Create Error:",
-      error
-    );
-
-    res.status(500).json({
-
-      success: false,
-
-      message: "Server error",
-
-      error: error.message,
-
-    });
-
-  }
-
 });
-
 
 
 // =====================================================
@@ -122,68 +76,39 @@ router.post("/", authMiddleware, async (req, res) => {
 // =====================================================
 
 router.get("/my", authMiddleware, async (req, res) => {
+    try {
 
-  try {
+        const applications = await Application.find({
+            candidate: req.user.id
+        })
+        .populate(
+            "job",
+            "title company location salary type experience description skills deadline"
+        )
+        .sort({
+            createdAt: -1
+        });
 
-    console.log(
-      "Candidate applications request"
-    );
+        return res.status(200).json({
+            success: true,
+            count: applications.length,
+            applications
+        });
 
-    console.log(
-      "Logged-in user:",
-      req.user
-    );
+    } catch (error) {
 
+        console.error(
+            "Candidate Applications Error:",
+            error
+        );
 
-    const applications =
-      await Application.find({
-
-        candidate: req.user.id,
-
-      })
-
-      .populate(
-        "job",
-        "title company location salary type experience description skills deadline"
-      )
-
-      .sort({
-        createdAt: -1,
-      });
-
-
-    res.status(200).json({
-
-      success: true,
-
-      count: applications.length,
-
-      applications,
-
-    });
-
-
-  } catch (error) {
-
-    console.error(
-      "Candidate Applications Error:",
-      error
-    );
-
-    res.status(500).json({
-
-      success: false,
-
-      message: "Server error",
-
-      error: error.message,
-
-    });
-
-  }
-
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
 });
-
 
 
 // =====================================================
@@ -191,85 +116,57 @@ router.get("/my", authMiddleware, async (req, res) => {
 // =====================================================
 
 router.get("/:id", authMiddleware, async (req, res) => {
+    try {
 
-  try {
-
-    const application =
-      await Application.findById(req.params.id)
-
-        .populate(
-          "candidate",
-          "name email"
+        const application = await Application.findById(
+            req.params.id
         )
-
         .populate(
-          "job",
-          "title company location salary type experience description skills deadline"
+            "candidate",
+            "name email"
+        )
+        .populate(
+            "job",
+            "title company location salary type experience description skills deadline"
         );
 
+        if (!application) {
+            return res.status(404).json({
+                success: false,
+                message: "Application not found"
+            });
+        }
 
-    // Application not found
-    if (!application) {
+        if (
+            req.user.role !== "admin" &&
+            application.candidate._id.toString() !==
+            req.user.id.toString()
+        ) {
+            return res.status(403).json({
+                success: false,
+                message: "Access denied"
+            });
+        }
 
-      return res.status(404).json({
+        return res.status(200).json({
+            success: true,
+            application
+        });
 
-        success: false,
+    } catch (error) {
 
-        message: "Application not found",
+        console.error(
+            "Get Single Application Error:",
+            error
+        );
 
-      });
-
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
     }
-
-
-    // Candidate can only see own application
-    if (
-      req.user.role !== "admin" &&
-      application.candidate._id.toString() !==
-      req.user.id.toString()
-    ) {
-
-      return res.status(403).json({
-
-        success: false,
-
-        message: "Access denied",
-
-      });
-
-    }
-
-
-    res.status(200).json({
-
-      success: true,
-
-      application,
-
-    });
-
-
-  } catch (error) {
-
-    console.error(
-      "Get Single Application Error:",
-      error
-    );
-
-    res.status(500).json({
-
-      success: false,
-
-      message: "Server error",
-
-      error: error.message,
-
-    });
-
-  }
-
 });
-
 
 
 // =====================================================
@@ -277,940 +174,532 @@ router.get("/:id", authMiddleware, async (req, res) => {
 // =====================================================
 
 router.get("/", authMiddleware, async (req, res) => {
+    try {
 
-  try {
+        if (req.user.role !== "admin") {
+            return res.status(403).json({
+                success: false,
+                message: "Access denied. Admins only."
+            });
+        }
 
-    console.log(
-      "Admin applications request"
-    );
+        const applications = await Application.find()
+            .populate(
+                "candidate",
+                "name email"
+            )
+            .populate(
+                "job",
+                "title company location salary type experience"
+            )
+            .sort({
+                createdAt: -1
+            });
 
-    console.log(
-      "User:",
-      req.user
-    );
-
-
-    // Admin only
-    if (req.user.role !== "admin") {
-
-      return res.status(403).json({
-
-        success: false,
-
-        message: "Access denied. Admins only.",
-
-      });
-
-    }
-
-
-    // Get all applications
-    const applications =
-      await Application.find()
-
-        .populate(
-          "candidate",
-          "name email"
-        )
-
-        .populate(
-          "job",
-          "title company location salary type experience"
-        )
-
-        .sort({
-          createdAt: -1,
+        return res.status(200).json({
+            success: true,
+            count: applications.length,
+            applications
         });
 
+    } catch (error) {
 
-    res.status(200).json({
+        console.error(
+            "Get Applications Error:",
+            error
+        );
 
-      success: true,
-
-      count: applications.length,
-
-      applications,
-
-    });
-
-
-  } catch (error) {
-
-    console.error(
-      "Get Applications Error:",
-      error
-    );
-
-    res.status(500).json({
-
-      success: false,
-
-      message: "Server error",
-
-      error: error.message,
-
-    });
-
-  }
-
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
 });
-
 
 
 // =====================================================
 // PATCH - ADMIN UPDATE APPLICATION STATUS
 // =====================================================
 
-router.patch("/:id/status", authMiddleware, async (req, res) => {
+router.patch(
+    "/:id/status",
+    authMiddleware,
+    async (req, res) => {
 
-  try {
+        try {
 
-    // Admin only
-    if (req.user.role !== "admin") {
+            if (req.user.role !== "admin") {
+                return res.status(403).json({
+                    success: false,
+                    message: "Access denied. Admins only."
+                });
+            }
 
-      return res.status(403).json({
+            const { status } = req.body;
 
-        success: false,
+            const allowedStatuses = [
+                "Pending",
+                "Shortlisted",
+                "Rejected",
+                "Accepted"
+            ];
 
-        message: "Access denied. Admins only.",
+            if (!allowedStatuses.includes(status)) {
+                return res.status(400).json({
+                    success: false,
+                    message:
+                        "Invalid status. Use Pending, Shortlisted, Rejected, or Accepted."
+                });
+            }
 
-      });
+            const application =
+                await Application.findByIdAndUpdate(
+                    req.params.id,
+                    {
+                        status
+                    },
+                    {
+                        new: true,
+                        runValidators: true
+                    }
+                )
+                .populate(
+                    "candidate",
+                    "name email"
+                )
+                .populate(
+                    "job",
+                    "title company location salary"
+                );
 
-    }
+            if (!application) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Application not found"
+                });
+            }
 
+            return res.status(200).json({
+                success: true,
+                message:
+                    "Application status updated successfully",
+                application
+            });
 
-    const { status } = req.body;
+        } catch (error) {
 
+            console.error(
+                "Update Application Status Error:",
+                error
+            );
 
-    // Allowed statuses
-    const allowedStatuses = [
-      "Pending",
-      "Shortlisted",
-      "Rejected",
-      "Accepted",
-    ];
-
-
-    if (!allowedStatuses.includes(status)) {
-
-      return res.status(400).json({
-
-        success: false,
-
-        message:
-          "Invalid status. Use Pending, Shortlisted, Rejected, or Accepted.",
-
-      });
-
-    }
-
-
-    const application =
-      await Application.findByIdAndUpdate(
-
-        req.params.id,
-
-        {
-          status: status,
-        },
-
-        {
-          new: true,
-          runValidators: true,
+            return res.status(500).json({
+                success: false,
+                message: "Server error",
+                error: error.message
+            });
         }
-
-      )
-
-      .populate(
-        "candidate",
-        "name email"
-      )
-
-      .populate(
-        "job",
-        "title company location salary"
-      );
-
-
-    if (!application) {
-
-      return res.status(404).json({
-
-        success: false,
-
-        message: "Application not found",
-
-      });
-
     }
-
-
-    res.status(200).json({
-
-      success: true,
-
-      message:
-        "Application status updated successfully",
-
-      application,
-
-    });
-
-
-  } catch (error) {
-
-    console.error(
-      "Update Application Status Error:",
-      error
-    );
-
-    res.status(500).json({
-
-      success: false,
-
-      message: "Server error",
-
-      error: error.message,
-
-    });
-
-  }
-
-});
-
-
+);
 
 
 // =====================================================
 // DELETE - ADMIN DELETE APPLICATION
 // =====================================================
 
-router.delete("/:id", authMiddleware, async (req, res) => {
+router.delete(
+    "/:id",
+    authMiddleware,
+    async (req, res) => {
 
-  try {
+        try {
 
-    console.log("Delete Application Request");
-    console.log("Application ID:", req.params.id);
-    console.log("Admin User:", req.user);
+            if (req.user.role !== "admin") {
+                return res.status(403).json({
+                    success: false,
+                    message: "Access denied. Admins only."
+                });
+            }
 
-    // Admin only
-    if (req.user.role !== "admin") {
+            const application =
+                await Application.findById(
+                    req.params.id
+                );
 
-      return res.status(403).json({
-        success: false,
-        message: "Access denied. Admins only."
-      });
+            if (!application) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Application not found"
+                });
+            }
 
+            await Application.findByIdAndDelete(
+                req.params.id
+            );
+
+            return res.status(200).json({
+                success: true,
+                message:
+                    "Application deleted successfully",
+                applicationId: req.params.id
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Delete Application Error:",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                message: "Server error",
+                error: error.message
+            });
+        }
     }
+);
 
-    // Find application
-    const application = await Application.findById(
-      req.params.id
-    );
-
-    if (!application) {
-
-      return res.status(404).json({
-        success: false,
-        message: "Application not found"
-      });
-
-    }
-
-    // Delete application
-    await Application.findByIdAndDelete(
-      req.params.id
-    );
-
-    res.status(200).json({
-
-      success: true,
-
-      message: "Application deleted successfully",
-
-      applicationId: req.params.id
-
-    });
-
-  } catch (error) {
-
-    console.error(
-      "Delete Application Error:",
-      error
-    );
-
-    res.status(500).json({
-
-      success: false,
-
-      message: "Server error",
-
-      error: error.message
-
-    });
-
-  }
-
-});
 
 // =====================================================
-// POST - UPLOAD RESUME FOR APPLICATION
+// PATCH - UPLOAD RESUME
 // =====================================================
 
 router.patch(
-  "/:id/resume",
-  authMiddleware,
-  uploadResume.single("resume"),
-  async (req, res) => {
-    try {
-      console.log("========== RESUME UPLOAD ==========");
-      console.log("Application ID:", req.params.id);
-      console.log("User:", req.user);
-      console.log("File:", req.file);
+    "/:id/resume",
+    authMiddleware,
+    uploadResume.single("resume"),
+    async (req, res) => {
 
-      // Resume required
-      if (!req.file) {
-        return res.status(400).json({
-          success: false,
-          message: "Please upload a resume"
-        });
-      }
+        try {
 
-      // Find application
-      const application = await Application.findById(
-        req.params.id
-      );
+            console.log("========== RESUME UPLOAD ==========");
+            console.log("Application ID:", req.params.id);
+            console.log("User:", req.user);
+            console.log("Uploaded File:", req.file);
 
-      if (!application) {
-        return res.status(404).json({
-          success: false,
-          message: "Application not found"
-        });
-      }
+            if (!req.file) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Please upload a resume"
+                });
+            }
 
-      // Candidate can update only own application
-      if (
-        req.user.role !== "admin" &&
-        application.candidate.toString() !==
-          req.user.id.toString()
-      ) {
-        return res.status(403).json({
-          success: false,
-          message: "Access denied"
-        });
-      }
+            const application =
+                await Application.findById(
+                    req.params.id
+                );
 
-      // Save resume information
-      application.resume = req.file.filename;
-      application.resumeOriginalName = req.file.originalname;
+            if (!application) {
 
-      await application.save();
+                if (req.file.path) {
+                    fs.unlink(
+                        req.file.path,
+                        () => {}
+                    );
+                }
 
-      res.status(200).json({
-        success: true,
-        message: "Resume uploaded successfully",
-        application
-      });
+                return res.status(404).json({
+                    success: false,
+                    message: "Application not found"
+                });
+            }
 
-    } catch (error) {
-      console.error(
-        "Resume Upload Error:",
-        error
-      );
+            const isAdmin =
+                req.user.role === "admin";
 
-      res.status(500).json({
-        success: false,
-        message: "Failed to upload resume",
-        error: error.message
-      });
+            const isOwner =
+                application.candidate.toString() ===
+                req.user.id.toString();
+
+            if (!isAdmin && !isOwner) {
+
+                if (req.file.path) {
+                    fs.unlink(
+                        req.file.path,
+                        () => {}
+                    );
+                }
+
+                return res.status(403).json({
+                    success: false,
+                    message: "Access denied"
+                });
+            }
+
+
+            // Delete old resume
+            if (application.resume) {
+
+                const oldResumePath =
+                    path.resolve(
+                        __dirname,
+                        "..",
+                        "uploads",
+                        "resumes",
+                        application.resume
+                    );
+
+                if (fs.existsSync(oldResumePath)) {
+                    fs.unlinkSync(oldResumePath);
+                }
+            }
+
+
+            // Save new resume
+            application.resume =
+                req.file.filename;
+
+            application.resumeOriginalName =
+                req.file.originalname;
+
+            await application.save();
+
+
+            console.log(
+                "Resume saved:",
+                application.resume
+            );
+
+            return res.status(200).json({
+                success: true,
+                message:
+                    "Resume uploaded successfully",
+                application
+            });
+
+        } catch (error) {
+
+            console.error(
+                "Resume Upload Error:",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Failed to upload resume",
+                error: error.message
+            });
+        }
     }
-  }
 );
+
 
 // =====================================================
 // GET - VIEW / DOWNLOAD RESUME
 // ADMIN + APPLICATION OWNER
 // =====================================================
 
-// const path = require("path");
-// const fs = require("fs");
-
 router.get(
-  "/:id/resume",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      console.log("========== RESUME ACCESS ==========");
-      console.log("Application ID:", req.params.id);
-      console.log("User:", req.user);
+    "/:id/resume",
+    authMiddleware,
+    async (req, res) => {
 
-      // Find application
-      const application =
-        await Application.findById(req.params.id);
+        try {
 
-      if (!application) {
-        return res.status(404).json({
-          success: false,
-          message: "Application not found",
-        });
-      }
+            console.log(
+                "========== RESUME ACCESS =========="
+            );
 
-      // ============================================
-      // AUTHORIZATION
-      // ============================================
+            console.log(
+                "Application ID:",
+                req.params.id
+            );
 
-      if (
-        req.user.role !== "admin" &&
-        application.candidate.toString() !==
-          req.user.id.toString()
-      ) {
-        return res.status(403).json({
-          success: false,
-          message: "Access denied",
-        });
-      }
+            console.log(
+                "User:",
+                req.user
+            );
 
-      // ============================================
-      // CHECK RESUME
-      // ============================================
 
-      if (!application.resume) {
-        return res.status(404).json({
-          success: false,
-          message: "Resume not uploaded",
-        });
-      }
+            // -----------------------------------------
+            // FIND APPLICATION
+            // -----------------------------------------
 
-      // ============================================
-      // RESUME PATH
-      // ============================================
+            const application =
+                await Application.findById(
+                    req.params.id
+                );
 
-      const resumePath = path.join(
-        __dirname,
-        "../uploads/resumes",
-        application.resume
-      );
+            if (!application) {
 
-      console.log(
-        "Resume Path:",
-        resumePath
-      );
+                return res.status(404).json({
+                    success: false,
+                    message: "Application not found"
+                });
+            }
 
-      // ============================================
-      // CHECK FILE EXISTS
-      // ============================================
 
-      if (!fs.existsSync(resumePath)) {
-        console.error(
-          "Resume file not found:",
-          resumePath
-        );
+            // -----------------------------------------
+            // CHECK RESUME
+            // -----------------------------------------
 
-        return res.status(404).json({
-          success: false,
-          message: "Resume file not found on server",
-        });
-      }
+            if (!application.resume) {
 
-      // ============================================
-      // VIEW OR DOWNLOAD
-      // ============================================
+                return res.status(404).json({
+                    success: false,
+                    message:
+                        "Resume not uploaded"
+                });
+            }
 
-      const download =
-        req.query.download === "true";
 
-      if (download) {
-        return res.download(
-          resumePath,
-          application.resumeOriginalName ||
-            application.resume
-        );
-      }
+            // -----------------------------------------
+            // AUTHORIZATION
+            // -----------------------------------------
 
-      // View resume in browser
-      return res.sendFile(
-        resumePath
-      );
+            const isAdmin =
+                req.user.role === "admin";
 
-    } catch (error) {
-      console.error(
-        "Resume Access Error:",
-        error
-      );
+            const isOwner =
+                application.candidate.toString() ===
+                req.user.id.toString();
 
-      return res.status(500).json({
-        success: false,
-        message: "Failed to access resume",
-        error: error.message,
-      });
+            if (!isAdmin && !isOwner) {
+
+                return res.status(403).json({
+                    success: false,
+                    message: "Access denied"
+                });
+            }
+
+
+            // -----------------------------------------
+            // BUILD ABSOLUTE FILE PATH
+            // -----------------------------------------
+
+            const resumePath =
+                path.resolve(
+                    __dirname,
+                    "..",
+                    "uploads",
+                    "resumes",
+                    application.resume
+                );
+
+            console.log(
+                "Resume Path:",
+                resumePath
+            );
+
+            console.log(
+                "Resume Exists:",
+                fs.existsSync(resumePath)
+            );
+
+
+            // -----------------------------------------
+            // FILE DOES NOT EXIST
+            // -----------------------------------------
+
+            if (!fs.existsSync(resumePath)) {
+
+                console.error(
+                    "❌ RESUME FILE NOT FOUND"
+                );
+
+                console.error(
+                    "Expected path:",
+                    resumePath
+                );
+
+                return res.status(404).json({
+                    success: false,
+                    message:
+                        "Resume file not found on server",
+                    filename:
+                        application.resume
+                });
+            }
+
+
+            // -----------------------------------------
+            // ORIGINAL FILE NAME
+            // -----------------------------------------
+
+            const originalName =
+                application.resumeOriginalName ||
+                application.resume;
+
+
+            // -----------------------------------------
+            // CONTENT TYPE
+            // -----------------------------------------
+
+            res.setHeader(
+                "Content-Type",
+                "application/pdf"
+            );
+
+
+            // -----------------------------------------
+            // VIEW / DOWNLOAD
+            // -----------------------------------------
+
+            const download =
+                req.query.download === "true";
+
+            if (download) {
+
+                res.setHeader(
+                    "Content-Disposition",
+                    `attachment; filename="${originalName}"`
+                );
+
+            } else {
+
+                res.setHeader(
+                    "Content-Disposition",
+                    `inline; filename="${originalName}"`
+                );
+            }
+
+
+            // -----------------------------------------
+            // SEND FILE
+            // -----------------------------------------
+
+            return res.sendFile(
+                resumePath,
+                (error) => {
+
+                    if (error) {
+
+                        console.error(
+                            "sendFile Error:",
+                            error
+                        );
+
+                        if (!res.headersSent) {
+
+                            return res.status(500).json({
+                                success: false,
+                                message:
+                                    "Failed to send resume"
+                            });
+                        }
+                    }
+
+                }
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Resume Access Error:",
+                error
+            );
+
+            return res.status(500).json({
+                success: false,
+                message:
+                    "Failed to access resume",
+                error: error.message
+            });
+        }
     }
-  }
-);
-// =====================================================
-// GET - VIEW / DOWNLOAD RESUME
-// =====================================================
-
-router.get(
-  "/:id/resume",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      console.log("========== RESUME ACCESS ==========");
-      console.log("Application ID:", req.params.id);
-      console.log("User:", req.user);
-
-      // -----------------------------------------
-      // Find application
-      // -----------------------------------------
-
-      const application =
-        await Application.findById(req.params.id);
-
-      if (!application) {
-        return res.status(404).json({
-          success: false,
-          message: "Application not found",
-        });
-      }
-
-      // -----------------------------------------
-      // Admin can access any resume
-      // Candidate can access only own resume
-      // -----------------------------------------
-
-      if (
-        req.user.role !== "admin" &&
-        application.candidate.toString() !==
-          req.user.id.toString()
-      ) {
-        return res.status(403).json({
-          success: false,
-          message: "Access denied",
-        });
-      }
-
-      // -----------------------------------------
-      // Check resume exists
-      // -----------------------------------------
-
-      if (!application.resume) {
-        return res.status(404).json({
-          success: false,
-          message: "Resume not uploaded",
-        });
-      }
-
-      // -----------------------------------------
-      // Resume path
-      // -----------------------------------------
-
-      const path = require("path");
-      const fs = require("fs");
-
-      const resumePath = path.join(
-        __dirname,
-        "..",
-        "uploads",
-        "resumes",
-        application.resume
-      );
-
-      console.log(
-        "Resume Path:",
-        resumePath
-      );
-
-      // -----------------------------------------
-      // Check file exists
-      // -----------------------------------------
-
-      if (!fs.existsSync(resumePath)) {
-        console.error(
-          "Resume file does not exist:",
-          resumePath
-        );
-
-        return res.status(404).json({
-          success: false,
-          message: "Resume file not found on server",
-        });
-      }
-
-      // -----------------------------------------
-      // Send resume
-      // -----------------------------------------
-
-      const originalName =
-        application.resumeOriginalName ||
-        application.resume;
-
-      res.setHeader(
-        "Content-Disposition",
-        `inline; filename="${originalName}"`
-      );
-
-      res.sendFile(resumePath);
-
-    } catch (error) {
-
-      console.error(
-        "Resume Access Error:",
-        error
-      );
-
-      res.status(500).json({
-        success: false,
-        message: "Failed to access resume",
-        error: error.message,
-      });
-    }
-  }
-);
-
-
-// // =====================================================
-// // GET - VIEW RESUME
-// // =====================================================
-
-// router.get(
-//     "/:id/resume/view",
-//     authMiddleware,
-//     async (req, res) => {
-
-//         try {
-
-//             const application =
-//                 await Application.findById(
-//                     req.params.id
-//                 );
-
-//             if (!application) {
-
-//                 return res.status(404).json({
-//                     success: false,
-//                     message: "Application not found"
-//                 });
-
-//             }
-
-//             // Candidate can only access own resume
-//             if (
-//                 req.user.role !== "admin" &&
-//                 application.candidate.toString() !==
-//                 req.user.id.toString()
-//             ) {
-
-//                 return res.status(403).json({
-//                     success: false,
-//                     message: "Access denied"
-//                 });
-
-//             }
-
-//             // Resume does not exist
-//             if (!application.resume) {
-
-//                 return res.status(404).json({
-//                     success: false,
-//                     message: "Resume not found"
-//                 });
-
-//             }
-
-//             const resumePath = path.join(
-//                 __dirname,
-//                 "../uploads/resumes",
-//                 application.resume
-//             );
-
-//             console.log(
-//                 "Resume View Path:",
-//                 resumePath
-//             );
-
-//             if (!fs.existsSync(resumePath)) {
-
-//                 console.log(
-//                     "Resume file does not exist:",
-//                     resumePath
-//                 );
-
-//                 return res.status(404).json({
-//                     success: false,
-//                     message: "Resume file not found on server"
-//                 });
-
-//             }
-
-//             // Open inside browser
-//             res.setHeader(
-//                 "Content-Disposition",
-//                 "inline"
-//             );
-
-//             res.sendFile(
-//                 path.resolve(resumePath)
-//             );
-
-//         } catch (error) {
-
-//             console.error(
-//                 "View Resume Error:",
-//                 error
-//             );
-
-//             res.status(500).json({
-//                 success: false,
-//                 message: "Failed to access resume",
-//                 error: error.message
-//             });
-
-//         }
-
-//     }
-// );
-
-// // =====================================================
-// // GET - DOWNLOAD RESUME
-// // =====================================================
-
-// router.get(
-//     "/:id/resume/download",
-//     authMiddleware,
-//     async (req, res) => {
-
-//         try {
-
-//             const application =
-//                 await Application.findById(
-//                     req.params.id
-//                 );
-
-//             if (!application) {
-
-//                 return res.status(404).json({
-//                     success: false,
-//                     message: "Application not found"
-//                 });
-
-//             }
-
-//             // Candidate can only download own resume
-//             if (
-//                 req.user.role !== "admin" &&
-//                 application.candidate.toString() !==
-//                 req.user.id.toString()
-//             ) {
-
-//                 return res.status(403).json({
-//                     success: false,
-//                     message: "Access denied"
-//                 });
-
-//             }
-
-//             if (!application.resume) {
-
-//                 return res.status(404).json({
-//                     success: false,
-//                     message: "Resume not found"
-//                 });
-
-//             }
-
-//             const resumePath = path.join(
-//                 __dirname,
-//                 "../uploads/resumes",
-//                 application.resume
-//             );
-
-//             console.log(
-//                 "Resume Download Path:",
-//                 resumePath
-//             );
-
-//             if (!fs.existsSync(resumePath)) {
-
-//                 return res.status(404).json({
-//                     success: false,
-//                     message: "Resume file not found on server"
-//                 });
-
-//             }
-
-//             const downloadName =
-//                 application.resumeOriginalName ||
-//                 application.resume;
-
-//             res.download(
-//                 path.resolve(resumePath),
-//                 downloadName
-//             );
-
-//         } catch (error) {
-
-//             console.error(
-//                 "Download Resume Error:",
-//                 error
-//             );
-
-//             res.status(500).json({
-//                 success: false,
-//                 message: "Failed to download resume",
-//                 error: error.message
-//             });
-
-//         }
-
-//     }
-// );
-
-// =====================================================
-// GET - VIEW / DOWNLOAD RESUME
-// =====================================================
-
-router.get(
-  "/:id/resume",
-  authMiddleware,
-  async (req, res) => {
-    try {
-      console.log("========== RESUME ACCESS ==========");
-      console.log("Application ID:", req.params.id);
-      console.log("User:", req.user);
-
-      // -----------------------------------------
-      // Find application
-      // -----------------------------------------
-
-      const application = await Application.findById(
-        req.params.id
-      );
-
-      if (!application) {
-        return res.status(404).json({
-          success: false,
-          message: "Application not found"
-        });
-      }
-
-      // -----------------------------------------
-      // Resume exists?
-      // -----------------------------------------
-
-      if (!application.resume) {
-        return res.status(404).json({
-          success: false,
-          message: "Resume not found for this application"
-        });
-      }
-
-      // -----------------------------------------
-      // Admin OR application owner
-      // -----------------------------------------
-
-      if (
-        req.user.role !== "admin" &&
-        application.candidate.toString() !==
-          req.user.id.toString()
-      ) {
-        return res.status(403).json({
-          success: false,
-          message: "Access denied"
-        });
-      }
-
-      // -----------------------------------------
-      // Resume file path
-      // -----------------------------------------
-
-      const resumePath = path.join(
-        __dirname,
-        "..",
-        "uploads",
-        "resumes",
-        application.resume
-      );
-
-      console.log(
-        "Resume file path:",
-        resumePath
-      );
-
-      // -----------------------------------------
-      // Check file exists
-      // -----------------------------------------
-
-      if (!fs.existsSync(resumePath)) {
-        console.error(
-          "Resume file does not exist:",
-          resumePath
-        );
-
-        return res.status(404).json({
-          success: false,
-          message: "Resume file not found on server"
-        });
-      }
-
-      // -----------------------------------------
-      // Determine view/download
-      // -----------------------------------------
-
-      const download =
-        req.query.download === "true";
-
-      // -----------------------------------------
-      // Set PDF content type
-      // -----------------------------------------
-
-      res.setHeader(
-        "Content-Type",
-        "application/pdf"
-      );
-
-      // -----------------------------------------
-      // VIEW
-      // -----------------------------------------
-
-      if (!download) {
-        res.setHeader(
-          "Content-Disposition",
-          `inline; filename="${application.resumeOriginalName || application.resume}"`
-        );
-      }
-
-      // -----------------------------------------
-      // DOWNLOAD
-      // -----------------------------------------
-
-      if (download) {
-        res.setHeader(
-          "Content-Disposition",
-          `attachment; filename="${application.resumeOriginalName || application.resume}"`
-        );
-      }
-
-      // -----------------------------------------
-      // Send file
-      // -----------------------------------------
-
-      return res.sendFile(
-        resumePath
-      );
-
-    } catch (error) {
-      console.error(
-        "Resume Access Error:",
-        error
-      );
-
-      return res.status(500).json({
-        success: false,
-        message: "Failed to access resume",
-        error: error.message
-      });
-    }
-  }
 );
 
 
